@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac857c6ea8cd2544b86aa0644eb1a257, type: 3}
+  m_Name: Prefabs
+  m_EditorClassIdentifier: 
+  player: {fileID: 1872988119417170, guid: cbff79408b806624cb1c9d249240dd4b, type: 2}
+  scenes:
+  - {fileID: 1769207381073088, guid: 3e64be3a118b7d2488facd7f98dcca57, type: 2}
+  - {fileID: 1858779636021200, guid: 66aa4335767392c409182ce05110d90d, type: 2}
