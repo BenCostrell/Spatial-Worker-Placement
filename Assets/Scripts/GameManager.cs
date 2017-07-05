@@ -8,9 +8,11 @@ public class GameManager : MonoBehaviour {
     public GameObject sceneRoot;
 
     public int numPlayers;
+    public int numInitialWorkers;
     [HideInInspector]
     public List<Player> players;
-    public Vector3[] playerSpawns;
+    public Vector3[] workerSpawns;
+    public Color[] playerColors;
 
 	void Awake()
     {
@@ -22,7 +24,6 @@ public class GameManager : MonoBehaviour {
         InitializePlayers();
         Services.EventManager.Register<Reset>(Reset);
         Services.SceneStackManager.PushScene<TitleScreen>();
-        //Services.TaskManager.AddTask(TestBranch(1));
     }
 	
 	// Update is called once per frame
@@ -44,15 +45,7 @@ public class GameManager : MonoBehaviour {
     void InitializePlayers()
     {
         players = new List<Player>();
-        for (int i = 0; i < numPlayers; i++) players.Add(InitializePlayer(i + 1));
-    }
-
-    Player InitializePlayer(int playerNum)
-    {
-        GameObject playerObj = Instantiate(Services.Prefabs.Player, playerSpawns[playerNum - 1], Quaternion.identity);
-        Player player = playerObj.GetComponent<Player>();
-        player.playerNum = playerNum;
-        return player;
+        for (int i = 0; i < numPlayers; i++) players.Add(new Player(i + 1));
     }
 
     void Reset(Reset e)

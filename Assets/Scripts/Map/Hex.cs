@@ -120,12 +120,22 @@ public class Hex {
         return hex.ScreenPos(layout);
     }
 
+    public static Vector2 ScreenPos(Hex hex)
+    {
+        return hex.ScreenPos();
+    }
+
     public Vector2 ScreenPos(Layout layout)
     {
         Orientation orientation = layout.orientation;
         float x = (orientation.f0 * q + orientation.f1 * r) * layout.size.x;
         float y = (orientation.f2 * q + orientation.f3 * r) * layout.size.y;
         return new Vector2(x + layout.origin.x, y + layout.origin.y);
+    }
+
+    public Vector2 ScreenPos()
+    {
+        return ScreenPos(Services.MapManager.layout);
     }
 }
 
