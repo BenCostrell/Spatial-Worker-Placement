@@ -13,4 +13,15 @@ public class Main : Scene<TransitionData> {
 	void Update () {
 		
 	}
+
+    internal override void Init()
+    {
+        InitializeMainServices();
+        Services.MapManager.CreateHexGrid();
+    }
+
+    void InitializeMainServices()
+    {
+        Services.MapManager = Services.GameManager.sceneRoot.GetComponentInChildren<MapManager>();
+    }
 }

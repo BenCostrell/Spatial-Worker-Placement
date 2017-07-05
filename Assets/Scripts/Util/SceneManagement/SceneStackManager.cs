@@ -92,14 +92,15 @@ public class SceneStackManager<TTransitionData>
         var previousScene = CurrentScene;
         var nextScene = GetScene<T>();
 
-        _sceneStack.Push(nextScene);
-        nextScene._OnEnter(data);
-
         if (previousScene != null)
         {
             previousScene._OnExit();
             previousScene.Root.SetActive(false);
         }
+
+        _sceneStack.Push(nextScene);
+        nextScene.Init();
+        nextScene._OnEnter(data);
     }
 
     // The scenemanager also has a swap method to be used when you want
@@ -118,6 +119,7 @@ public class SceneStackManager<TTransitionData>
 
         var nextScene = GetScene<T>();
         _sceneStack.Push(nextScene);
+        nextScene.Init();
         nextScene._OnEnter(data);
 
         if (previousScene != null)
