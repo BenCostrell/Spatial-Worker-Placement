@@ -8,7 +8,6 @@ public class GameManager : MonoBehaviour {
     public GameObject sceneRoot;
 
     public int numPlayers;
-    public int numInitialWorkers;
     [HideInInspector]
     public List<Player> players;
     public Vector3[] workerSpawns;

@@ -10,4 +10,5 @@ public static class Services {
     public static SceneStackManager<TransitionData> SceneStackManager { get; set; }
     public static InputManager InputManager { get; set; }
     public static MapManager MapManager { get; set; }
+    public static Main main { get; set; }
 }
