@@ -21,7 +21,9 @@ public class Worker : MonoBehaviour {
 
     public void PlaceOnTile(Tile tile)
     {
+        if (currentTile != null) currentTile.containedWorker = null;
         currentTile = tile;
+        tile.containedWorker = this;
         transform.position = tile.hex.ScreenPos();
     }
 }

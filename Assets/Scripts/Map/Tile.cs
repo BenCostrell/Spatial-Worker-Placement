@@ -9,6 +9,7 @@ public class Tile
     public readonly Hex hex;
     public GameObject obj;
     public List<Tile> neighbors;
+    public Worker containedWorker;
 
     public Tile(Hex hex_)
     {
