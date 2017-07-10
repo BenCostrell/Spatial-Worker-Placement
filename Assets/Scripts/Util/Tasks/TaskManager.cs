@@ -20,7 +20,16 @@ public class TaskManager {
         taskTree.root.SetStatus(Task.TaskStatus.Pending);
     }
 
-	public void Update(){
+    public void AddTaskQueue(TaskQueue taskQueue)
+    {
+        AddTask(taskQueue.tasks[0]);
+        for (int i = 1; i < taskQueue.tasks.Count; i++)
+        {
+            taskQueue.tasks[i - 1].Then(taskQueue.tasks[i]);
+        }
+    }
+
+    public void Update(){
 		Task task;
 		for (int i = tasks.Count - 1; i >= 0; i--) {
 			task = tasks [i];

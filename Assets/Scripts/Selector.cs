@@ -69,7 +69,8 @@ public class Selector : MonoBehaviour
     {
         if (selectedWorker != null && hoveredTile.containedWorker == null)
         {
-            selectedWorker.PlaceOnTile(hoveredTile);
+            //selectedWorker.PlaceOnTile(hoveredTile);
+            selectedWorker.AnimateMovementAlongPath(AStarSearch.ShortestPath(selectedWorker.currentTile, hoveredTile));
             selectedWorker = null;
             ClearPath();
         }

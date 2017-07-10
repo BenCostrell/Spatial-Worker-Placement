@@ -143,6 +143,24 @@ public class Task {
         Debug.Assert(!taskTree.root.IsAttached);
         nextTasks = new List<Task>(){ taskTree.DistributedTree() };
     }
+
+    public Task Then(TaskQueue taskQueue)
+    {
+        foreach (Task task in taskQueue.tasks)
+        {
+            Debug.Assert(!task.IsAttached);
+        }
+
+        nextTasks = new List<Task>();
+
+        nextTasks.Add(taskQueue.tasks[0]);
+
+        for (int i = 1; i < taskQueue.tasks.Count; i++)
+        {
+            taskQueue.tasks[i - 1].nextTasks.Add(taskQueue.tasks[i]);
+        }
+        return taskQueue.tasks[taskQueue.tasks.Count - 1];
+    }
 }
 
 public class TaskTree
@@ -163,6 +181,33 @@ public class TaskTree
         if (children.Count > 0) foreach (TaskTree child in children) childrenDistributed.Add(child.DistributedTree());
         root.Then(childrenDistributed);
         return root;
+    }
+}
+
+public class TaskQueue
+{
+    public List<Task> tasks;
+
+    public TaskQueue(List<Task> taskList)
+    {
+        tasks = taskList;
+    }
+
+    public TaskQueue()
+    {
+        tasks = new List<Task>();
+    }
+
+    public TaskQueue Then(TaskQueue taskQueue)
+    {
+        tasks.AddRange(taskQueue.tasks);
+        return this;
+    }
+
+    public TaskQueue Add(Task task)
+    {
+        tasks.Add(task);
+        return this;
     }
 }
 
