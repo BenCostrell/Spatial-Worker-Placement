@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Main : Scene<TransitionData> {
 
@@ -8,10 +9,12 @@ public class Main : Scene<TransitionData> {
     public Selector selector;
     [HideInInspector]
     public Player currentActivePlayer;
+    public GameObject roundCounter;
+    private int roundNum;
 
     // Use this for initialization
     void Start () {
-		
+        
 	}
 	
 	// Update is called once per frame
@@ -25,7 +28,8 @@ public class Main : Scene<TransitionData> {
         Services.MapManager.CreateHexGrid();
         PlaceInitialWorkers();
         CreateSelector();
-        currentActivePlayer = Services.GameManager.players[0];
+        roundNum = 0;
+        StartRound();
     }
 
     void InitializeMainServices()
@@ -55,5 +59,62 @@ public class Main : Scene<TransitionData> {
         selector = Instantiate(Services.Prefabs.Selector, Services.SceneStackManager.CurrentScene.transform)
             .GetComponent<Selector>();
         selector.PlaceOnTile(Services.MapManager.map[new Hex(0, 0, 0)]);
+    }
+
+    void StartRound()
+    {
+        roundNum += 1;
+        currentActivePlayer = Services.GameManager.players[(roundNum - 1) % Services.GameManager.numPlayers];
+        foreach (Player player in Services.GameManager.players)
+        {
+            foreach (Worker worker in player.workers) worker.Refresh();
+        }
+        SetRoundCounter();
+    }
+
+    void EndRound()
+    {
+        StartRound();
+    }
+
+    public void TurnEnd()
+    {
+        selector.Reset();
+        Player nextPlayer = DetermineNextPlayer();
+        if (nextPlayer == null) EndRound();
+        else {
+            currentActivePlayer = nextPlayer;
+            SetRoundCounter();
+        }
+    }
+
+    Player DetermineNextPlayer()
+    {
+        Player nextPlayer = null;
+        Player[] orderedCandidateNextPlayers = new Player[Services.GameManager.numPlayers];
+        int playerIndex = currentActivePlayer.playerNum % Services.GameManager.numPlayers;
+        for (int i = 0; i < Services.GameManager.numPlayers; i++)
+        {
+            orderedCandidateNextPlayers[i] = Services.GameManager.players[playerIndex];
+            playerIndex = (playerIndex + 1) % Services.GameManager.numPlayers;
+        }
+        for (int i = 0; i < orderedCandidateNextPlayers.Length; i++)
+        {
+            bool hasWorkersRemaining = false;
+            foreach (Worker worker in orderedCandidateNextPlayers[i].workers)
+                if (!worker.movedThisRound) hasWorkersRemaining = true;
+            if (hasWorkersRemaining)
+            {
+                nextPlayer = orderedCandidateNextPlayers[i];
+                break;
+            }
+        }
+        return nextPlayer;
+    }
+
+    void SetRoundCounter()
+    {
+        roundCounter.GetComponent<Text>().text = "Round " + roundNum + "\n" + 
+            "Player " + currentActivePlayer.playerNum + " Turn";
     }
 }

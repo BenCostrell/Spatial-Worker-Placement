@@ -10,14 +10,24 @@ public class Worker : MonoBehaviour {
     public Tile currentTile;
     public float tileHopTime;
     private TaskManager taskManager;
+    private SpriteRenderer sr;
+
+    [HideInInspector]
+    public bool movedThisRound;
+    [HideInInspector]
+    public bool selected;
 
     // Use this for initialization
-    void Start () {
+    public void Init (Player parent, Tile tile) {
+        parentPlayer = parent;
         taskManager = new TaskManager();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        sr = GetComponent<SpriteRenderer>();
+        sr.color = parentPlayer.color;
+        PlaceOnTile(tile);
+    }
+
+    // Update is called once per frame
+    void Update () {
         taskManager.Update();
 	}
 
@@ -39,5 +49,41 @@ public class Worker : MonoBehaviour {
         }
 
         taskManager.AddTaskQueue(movementTasks);
+    }
+
+    public void EndTurn()
+    {
+        movedThisRound = true;
+        sr.color = (parentPlayer.color + Color.gray) / 2;
+        Services.main.TurnEnd();
+    }
+
+    public void Refresh()
+    {
+        movedThisRound = false;
+        sr.color = parentPlayer.color;
+    }
+
+    public void Select()
+    {
+        selected = true;
+        sr.color = (parentPlayer.color + Color.white) / 2;
+        Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
+    }
+
+    public void Unselect()
+    {
+        selected = false;
+        if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
+        else sr.color = parentPlayer.color;
+    }
+
+    void OnButtonPressed(ButtonPressed e)
+    {
+        if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "B" && selected)
+        {
+            Unselect();
+            EndTurn();
+        }
     }
 }

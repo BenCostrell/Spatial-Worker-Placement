@@ -71,13 +71,17 @@ public class Selector : MonoBehaviour
         {
             //selectedWorker.PlaceOnTile(hoveredTile);
             selectedWorker.AnimateMovementAlongPath(AStarSearch.ShortestPath(selectedWorker.currentTile, hoveredTile));
+            selectedWorker.Unselect();
             selectedWorker = null;
             ClearPath();
         }
         else {
-            if (hoveredTile.containedWorker != null)
+            if (hoveredTile.containedWorker != null && !hoveredTile.containedWorker.movedThisRound 
+                && hoveredTile.containedWorker.parentPlayer == Services.main.currentActivePlayer)
             {
+                if (selectedWorker != null) selectedWorker.Unselect();
                 selectedWorker = hoveredTile.containedWorker;
+                selectedWorker.Select();
             }
         }
     }
@@ -92,7 +96,14 @@ public class Selector : MonoBehaviour
         }
     }
 
-    void ClearPath()
+    public void Reset()
+    {
+        ClearPath();
+        if (selectedWorker != null) selectedWorker.Unselect();
+        selectedWorker = null;
+    }
+
+    public void ClearPath()
     {
         if (tilePath.Count > 0)
         {

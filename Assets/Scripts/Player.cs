@@ -20,8 +20,7 @@ public class Player {
     {
         Worker worker = GameObject.Instantiate(Services.Prefabs.Worker, 
             Services.SceneStackManager.CurrentScene.transform).GetComponent<Worker>();
-        worker.PlaceOnTile(tile);
-        worker.GetComponent<SpriteRenderer>().color = color;
+        worker.Init(this, tile);
         workers.Add(worker);
     }
 }
