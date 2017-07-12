@@ -11,6 +11,9 @@ public class Worker : MonoBehaviour {
     public float tileHopTime;
     private TaskManager taskManager;
     private SpriteRenderer sr;
+    public int defaultStartingMaxMovement;
+    private int maxMovementPerTurn;
+    private int movesRemaining;
 
     [HideInInspector]
     public bool movedThisRound;
@@ -23,6 +26,8 @@ public class Worker : MonoBehaviour {
         taskManager = new TaskManager();
         sr = GetComponent<SpriteRenderer>();
         sr.color = parentPlayer.color;
+        maxMovementPerTurn = defaultStartingMaxMovement;
+        movesRemaining = maxMovementPerTurn;
         PlaceOnTile(tile);
     }
 
@@ -39,7 +44,7 @@ public class Worker : MonoBehaviour {
         transform.position = tile.hex.ScreenPos();
     }
 
-    public void AnimateMovementAlongPath(List<Tile> path)
+    void AnimateMovementAlongPath(List<Tile> path)
     {
         TaskQueue movementTasks = new TaskQueue();
 
@@ -49,6 +54,27 @@ public class Worker : MonoBehaviour {
         }
 
         taskManager.AddTaskQueue(movementTasks);
+    }
+
+    void InitiateMovement(List<Tile> path)
+    {
+        movesRemaining -= (path.Count - 1);
+        AnimateMovementAlongPath(path);
+    }
+
+    public bool TryToMove(Tile goal)
+    {
+        List<Tile> path = AStarSearch.ShortestPath(currentTile, goal);
+        if (CanMoveAlongPath(path)) {
+            InitiateMovement(path);
+            return true;
+        }
+        else return false;
+    }
+
+    public bool CanMoveAlongPath(List<Tile> path)
+    {
+        return ((path.Count - 1) <= movesRemaining);
     }
 
     public void EndTurn()
@@ -61,6 +87,7 @@ public class Worker : MonoBehaviour {
     public void Refresh()
     {
         movedThisRound = false;
+        movesRemaining = maxMovementPerTurn;
         sr.color = parentPlayer.color;
     }
 
@@ -69,6 +96,7 @@ public class Worker : MonoBehaviour {
         selected = true;
         sr.color = (parentPlayer.color + Color.white) / 2;
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
+        Services.main.SetWorkerTooltip(movesRemaining, maxMovementPerTurn);
     }
 
     public void Unselect()
@@ -76,6 +104,8 @@ public class Worker : MonoBehaviour {
         selected = false;
         if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
         else sr.color = parentPlayer.color;
+        Services.EventManager.Unregister<ButtonPressed>(OnButtonPressed);
+        Services.main.HideWorkerTooltip();
     }
 
     void OnButtonPressed(ButtonPressed e)

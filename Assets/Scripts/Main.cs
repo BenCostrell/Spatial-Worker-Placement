@@ -10,6 +10,7 @@ public class Main : Scene<TransitionData> {
     [HideInInspector]
     public Player currentActivePlayer;
     public GameObject roundCounter;
+    public GameObject workerTooltip;
     private int roundNum;
 
     // Use this for initialization
@@ -29,6 +30,7 @@ public class Main : Scene<TransitionData> {
         PlaceInitialWorkers();
         CreateSelector();
         roundNum = 0;
+        HideWorkerTooltip();
         StartRound();
     }
 
@@ -116,5 +118,16 @@ public class Main : Scene<TransitionData> {
     {
         roundCounter.GetComponent<Text>().text = "Round " + roundNum + "\n" + 
             "Player " + currentActivePlayer.playerNum + " Turn";
+    }
+
+    public void SetWorkerTooltip(int movesRemaining, int maxMoves)
+    {
+        workerTooltip.SetActive(true);
+        workerTooltip.GetComponent<Text>().text = "Moves: " + movesRemaining + "/" + maxMoves;
+    }
+
+    public void HideWorkerTooltip()
+    {
+        workerTooltip.SetActive(false);
     }
 }

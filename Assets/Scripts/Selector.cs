@@ -6,7 +6,6 @@ public class Selector : MonoBehaviour
 {
 
     private Tile hoveredTile;
-    private Tile lastHoveredTile;
     private List<Tile> tilePath;
     private int inputLastFrame;
     public float timeToWaitBeforeRepeatingInput;
@@ -25,8 +24,6 @@ public class Selector : MonoBehaviour
     void Update()
     {
         ProcessInput();
-        if (selectedWorker != null && hoveredTile != lastHoveredTile) HighlightPath(selectedWorker.currentTile, hoveredTile);
-        lastHoveredTile = hoveredTile;
     }
 
     public void PlaceOnTile(Tile tile)
@@ -40,24 +37,30 @@ public class Selector : MonoBehaviour
         float xInput = Input.GetAxis("Horizontal_P" + Services.main.currentActivePlayer.playerNum);
         float yInput = Input.GetAxis("Vertical_P" + Services.main.currentActivePlayer.playerNum);
         float mag = new Vector2(xInput, yInput).magnitude;
-        if (mag < 0.1f) inputLastFrame = -1;
-        else 
+        if (mag > 0.1f)
         {
-            float angle = Mathf.Atan2(yInput, xInput) * Mathf.Rad2Deg;
-            float convertedAngle = (angle + 330) % 360;
-            int directionIndex = 5 - Mathf.FloorToInt(convertedAngle / 60f);
-            if (directionIndex != inputLastFrame || timeSinceLastUniqueInput > timeToWaitBeforeRepeatingInput)
-            {
-                Tile tile;
-                if (Services.MapManager.map.TryGetValue(hoveredTile.hex.Neighbor(directionIndex), out tile))
-                {
-                    PlaceOnTile(tile);
-                }
-                timeSinceLastUniqueInput = 0;
-            }
-            else timeSinceLastUniqueInput += Time.deltaTime;
-            inputLastFrame = directionIndex;
+            MoveSelector(xInput, yInput);
+            if (selectedWorker != null) HighlightPath(selectedWorker.currentTile, hoveredTile);
         }
+        else inputLastFrame = -1;
+    }
+
+    void MoveSelector(float xInput, float yInput)
+    {
+        float angle = Mathf.Atan2(yInput, xInput) * Mathf.Rad2Deg;
+        float convertedAngle = (angle + 330) % 360;
+        int directionIndex = 5 - Mathf.FloorToInt(convertedAngle / 60f);
+        if (directionIndex != inputLastFrame || timeSinceLastUniqueInput > timeToWaitBeforeRepeatingInput)
+        {
+            Tile tile;
+            if (Services.MapManager.map.TryGetValue(hoveredTile.hex.Neighbor(directionIndex), out tile))
+            {
+                PlaceOnTile(tile);
+            }
+            timeSinceLastUniqueInput = 0;
+        }
+        else timeSinceLastUniqueInput += Time.deltaTime;
+        inputLastFrame = directionIndex;
     }
 
     void OnButtonPressed (ButtonPressed e)
@@ -69,38 +72,52 @@ public class Selector : MonoBehaviour
     {
         if (selectedWorker != null && hoveredTile.containedWorker == null)
         {
-            //selectedWorker.PlaceOnTile(hoveredTile);
-            selectedWorker.AnimateMovementAlongPath(AStarSearch.ShortestPath(selectedWorker.currentTile, hoveredTile));
-            selectedWorker.Unselect();
-            selectedWorker = null;
-            ClearPath();
+            if (selectedWorker.TryToMove(hoveredTile))
+            {
+                UnselectWorker();
+                ClearPath();
+            }
         }
         else {
             if (hoveredTile.containedWorker != null && !hoveredTile.containedWorker.movedThisRound 
                 && hoveredTile.containedWorker.parentPlayer == Services.main.currentActivePlayer)
             {
-                if (selectedWorker != null) selectedWorker.Unselect();
-                selectedWorker = hoveredTile.containedWorker;
-                selectedWorker.Select();
+                if (selectedWorker != null) UnselectWorker();
+                SelectWorker(hoveredTile.containedWorker);
             }
         }
     }
 
+    void SelectWorker(Worker worker)
+    {
+        worker.Select();
+        selectedWorker = worker;
+    }
+
+    void UnselectWorker()
+    {
+        selectedWorker.Unselect();
+        selectedWorker = null;
+    }
+
     void HighlightPath(Tile start, Tile goal)
     {
-        ClearPath();
-        tilePath = AStarSearch.ShortestPath(start, goal);
-        foreach(Tile tile in tilePath)
+        List<Tile> newPath = AStarSearch.ShortestPath(start, goal);
+        if (selectedWorker.CanMoveAlongPath(newPath))
         {
-            tile.obj.GetComponent<SpriteRenderer>().color = Color.gray;
+            ClearPath();
+            tilePath = newPath;
+            foreach (Tile tile in tilePath)
+            {
+                tile.obj.GetComponent<SpriteRenderer>().color = Color.gray;
+            }
         }
     }
 
     public void Reset()
     {
         ClearPath();
-        if (selectedWorker != null) selectedWorker.Unselect();
-        selectedWorker = null;
+        if (selectedWorker != null) UnselectWorker();
     }
 
     public void ClearPath()
