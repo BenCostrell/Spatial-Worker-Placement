@@ -10,6 +10,7 @@ public class Selector : MonoBehaviour
     private int inputLastFrame;
     public float timeToWaitBeforeRepeatingInput;
     private float timeSinceLastUniqueInput;
+    private Worker hoveredWorker;
     private Worker selectedWorker;
 
     // Use this for initialization
@@ -41,6 +42,7 @@ public class Selector : MonoBehaviour
         {
             MoveSelector(xInput, yInput);
             if (selectedWorker != null) HighlightPath(selectedWorker.currentTile, hoveredTile);
+            ShowAppropriateTooltip();
         }
         else inputLastFrame = -1;
     }
@@ -63,6 +65,24 @@ public class Selector : MonoBehaviour
         inputLastFrame = directionIndex;
     }
 
+    void ShowAppropriateTooltip()
+    {
+        if (hoveredTile.containedWorker != null && selectedWorker == null)
+        {
+            if (hoveredWorker != hoveredTile.containedWorker)
+            {
+                if (hoveredWorker != null) hoveredWorker.HideTooltip();
+                hoveredWorker = hoveredTile.containedWorker;
+                hoveredWorker.ShowToolTip();
+            }
+        }
+        else if (hoveredWorker != null)
+        {
+            hoveredWorker.HideTooltip();
+            hoveredWorker = null;
+        }
+    }
+
     void OnButtonPressed (ButtonPressed e)
     {
         if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "A") SelectTile();
@@ -72,18 +92,22 @@ public class Selector : MonoBehaviour
     {
         if (selectedWorker != null && hoveredTile.containedWorker == null)
         {
-            if (selectedWorker.TryToMove(hoveredTile))
-            {
-                UnselectWorker();
-                ClearPath();
-            }
+            selectedWorker.TryToMove(hoveredTile);
+            UnselectWorker();
+            ClearPath();
+            
         }
         else {
-            if (hoveredTile.containedWorker != null && !hoveredTile.containedWorker.movedThisRound 
-                && hoveredTile.containedWorker.parentPlayer == Services.main.currentActivePlayer)
+            if (hoveredTile.containedWorker != null)
             {
-                if (selectedWorker != null) UnselectWorker();
-                SelectWorker(hoveredTile.containedWorker);
+                Worker worker = hoveredTile.containedWorker;
+                if (!worker.movedThisRound && 
+                    worker.parentPlayer == Services.main.currentActivePlayer &&
+                    (!worker.parentPlayer.movedWorkerThisTurn || worker.movedThisTurn))
+                {
+                    if (selectedWorker != null) UnselectWorker();
+                    SelectWorker(worker);
+                }
             }
         }
     }
@@ -130,5 +154,10 @@ public class Selector : MonoBehaviour
             }
         }
         tilePath = new List<Tile>();
+    }
+
+    public void SetColor()
+    {
+        GetComponent<SpriteRenderer>().color = Services.main.currentActivePlayer.color;
     }
 }

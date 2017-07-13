@@ -67,11 +67,8 @@ public class Main : Scene<TransitionData> {
     {
         roundNum += 1;
         currentActivePlayer = Services.GameManager.players[(roundNum - 1) % Services.GameManager.numPlayers];
-        foreach (Player player in Services.GameManager.players)
-        {
-            foreach (Worker worker in player.workers) worker.Refresh();
-        }
-        SetRoundCounter();
+        foreach (Player player in Services.GameManager.players) player.Refresh();
+        UpdateUI();
     }
 
     void EndRound()
@@ -82,11 +79,12 @@ public class Main : Scene<TransitionData> {
     public void TurnEnd()
     {
         selector.Reset();
+        currentActivePlayer.movedWorkerThisTurn = false;
         Player nextPlayer = DetermineNextPlayer();
         if (nextPlayer == null) EndRound();
         else {
             currentActivePlayer = nextPlayer;
-            SetRoundCounter();
+            UpdateUI();
         }
     }
 
@@ -114,10 +112,11 @@ public class Main : Scene<TransitionData> {
         return nextPlayer;
     }
 
-    void SetRoundCounter()
+    void UpdateUI()
     {
         roundCounter.GetComponent<Text>().text = "Round " + roundNum + "\n" + 
             "Player " + currentActivePlayer.playerNum + " Turn";
+        selector.SetColor();
     }
 
     public void SetWorkerTooltip(int movesRemaining, int maxMoves)

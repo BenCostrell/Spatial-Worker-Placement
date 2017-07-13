@@ -18,6 +18,8 @@ public class Worker : MonoBehaviour {
     [HideInInspector]
     public bool movedThisRound;
     [HideInInspector]
+    public bool movedThisTurn;
+    [HideInInspector]
     public bool selected;
 
     // Use this for initialization
@@ -60,6 +62,11 @@ public class Worker : MonoBehaviour {
     {
         movesRemaining -= (path.Count - 1);
         AnimateMovementAlongPath(path);
+        if (path.Count > 0)
+        {
+            movedThisTurn = true;
+            parentPlayer.movedWorkerThisTurn = true;
+        }
     }
 
     public bool TryToMove(Tile goal)
@@ -80,6 +87,7 @@ public class Worker : MonoBehaviour {
     public void EndTurn()
     {
         movedThisRound = true;
+        movedThisTurn = false;
         sr.color = (parentPlayer.color + Color.gray) / 2;
         Services.main.TurnEnd();
     }
@@ -115,5 +123,15 @@ public class Worker : MonoBehaviour {
             Unselect();
             EndTurn();
         }
+    }
+
+    public void ShowToolTip()
+    {
+        Services.main.SetWorkerTooltip(movesRemaining, maxMovementPerTurn);
+    }
+
+    public void HideTooltip()
+    {
+        Services.main.HideWorkerTooltip();
     }
 }

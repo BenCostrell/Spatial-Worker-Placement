@@ -5,16 +5,17 @@ using UnityEngine;
 public class Player {
 
     public int playerNum;
+    public Color color;
+    public List<Worker> workers;
+    public bool movedWorkerThisTurn;
 
     public Player(int playerNum_)
     {
         playerNum = playerNum_;
         color = Services.GameManager.playerColors[playerNum - 1];
         workers = new List<Worker>();
+        movedWorkerThisTurn = false;
     }
-
-    public Color color;
-    public List<Worker> workers;
 
     public void AddWorker(Tile tile)
     {
@@ -22,5 +23,11 @@ public class Player {
             Services.SceneStackManager.CurrentScene.transform).GetComponent<Worker>();
         worker.Init(this, tile);
         workers.Add(worker);
+    }
+
+    public void Refresh()
+    {
+        foreach (Worker worker in workers) worker.Refresh();
+        movedWorkerThisTurn = false;
     }
 }
