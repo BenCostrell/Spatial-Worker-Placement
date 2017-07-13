@@ -10,6 +10,7 @@ public class Tile
     public GameObject obj;
     public List<Tile> neighbors;
     public Worker containedWorker;
+    public Resource containedResource;
 
     public Tile(Hex hex_)
     {

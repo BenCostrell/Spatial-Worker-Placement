@@ -65,8 +65,9 @@ public class Selector : MonoBehaviour
         inputLastFrame = directionIndex;
     }
 
-    void ShowAppropriateTooltip()
+    public void ShowAppropriateTooltip()
     {
+        Services.main.SetTileTooltip(hoveredTile);
         if (hoveredTile.containedWorker != null && selectedWorker == null)
         {
             if (hoveredWorker != hoveredTile.containedWorker)
@@ -80,6 +81,10 @@ public class Selector : MonoBehaviour
         {
             hoveredWorker.HideTooltip();
             hoveredWorker = null;
+        }
+        if (selectedWorker != null)
+        {
+            selectedWorker.ShowToolTip();
         }
     }
 
@@ -103,7 +108,8 @@ public class Selector : MonoBehaviour
                 Worker worker = hoveredTile.containedWorker;
                 if (!worker.movedThisRound && 
                     worker.parentPlayer == Services.main.currentActivePlayer &&
-                    (!worker.parentPlayer.movedWorkerThisTurn || worker.movedThisTurn))
+                    ((worker.parentPlayer.workerMovedThisTurn == null) || 
+                    (worker.parentPlayer.workerMovedThisTurn == worker)))
                 {
                     if (selectedWorker != null) UnselectWorker();
                     SelectWorker(worker);
@@ -142,6 +148,8 @@ public class Selector : MonoBehaviour
     {
         ClearPath();
         if (selectedWorker != null) UnselectWorker();
+        PlaceOnTile(Services.MapManager.map[new Hex(0, 0, 0)]);
+        ShowAppropriateTooltip();
     }
 
     public void ClearPath()

@@ -11,9 +11,17 @@ public class Worker : MonoBehaviour {
     public float tileHopTime;
     private TaskManager taskManager;
     private SpriteRenderer sr;
-    public int defaultStartingMaxMovement;
-    private int maxMovementPerTurn;
-    private int movesRemaining;
+    public int startingMaxMovement;
+    [HideInInspector]
+    public int maxMovementPerTurn;
+    [HideInInspector]
+    public int movesRemaining;
+    public int startingCarryingCapacity;
+    [HideInInspector]
+    public int carryingCapacity;
+    [HideInInspector]
+    public int resourcesInHand;
+
 
     [HideInInspector]
     public bool movedThisRound;
@@ -28,8 +36,10 @@ public class Worker : MonoBehaviour {
         taskManager = new TaskManager();
         sr = GetComponent<SpriteRenderer>();
         sr.color = parentPlayer.color;
-        maxMovementPerTurn = defaultStartingMaxMovement;
+        maxMovementPerTurn = startingMaxMovement;
         movesRemaining = maxMovementPerTurn;
+        carryingCapacity = startingCarryingCapacity;
+        resourcesInHand = 0;
         PlaceOnTile(tile);
     }
 
@@ -55,6 +65,8 @@ public class Worker : MonoBehaviour {
             movementTasks.Add(new AnimateWorkerMovement(this, path[i], tileHopTime));
         }
 
+        movementTasks.Add(new ActionTask(EndMovement));
+
         taskManager.AddTaskQueue(movementTasks);
     }
 
@@ -64,8 +76,7 @@ public class Worker : MonoBehaviour {
         AnimateMovementAlongPath(path);
         if (path.Count > 0)
         {
-            movedThisTurn = true;
-            parentPlayer.movedWorkerThisTurn = true;
+            parentPlayer.workerMovedThisTurn = this;
         }
     }
 
@@ -84,12 +95,20 @@ public class Worker : MonoBehaviour {
         return ((path.Count - 1) <= movesRemaining);
     }
 
+    void EndMovement()
+    {
+        if (currentTile.containedResource != null && resourcesInHand < carryingCapacity)
+        {
+            GetResources(currentTile.containedResource.GetClaimed(carryingCapacity - resourcesInHand));
+        }
+        Services.main.selector.ShowAppropriateTooltip();
+    }
+
     public void EndTurn()
     {
+        Unselect();
         movedThisRound = true;
-        movedThisTurn = false;
         sr.color = (parentPlayer.color + Color.gray) / 2;
-        Services.main.TurnEnd();
     }
 
     public void Refresh()
@@ -103,8 +122,7 @@ public class Worker : MonoBehaviour {
     {
         selected = true;
         sr.color = (parentPlayer.color + Color.white) / 2;
-        Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
-        Services.main.SetWorkerTooltip(movesRemaining, maxMovementPerTurn);
+        Services.main.ShowWorkerTooltip(this);
     }
 
     public void Unselect()
@@ -112,26 +130,21 @@ public class Worker : MonoBehaviour {
         selected = false;
         if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
         else sr.color = parentPlayer.color;
-        Services.EventManager.Unregister<ButtonPressed>(OnButtonPressed);
         Services.main.HideWorkerTooltip();
-    }
-
-    void OnButtonPressed(ButtonPressed e)
-    {
-        if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "B" && selected)
-        {
-            Unselect();
-            EndTurn();
-        }
     }
 
     public void ShowToolTip()
     {
-        Services.main.SetWorkerTooltip(movesRemaining, maxMovementPerTurn);
+        Services.main.ShowWorkerTooltip(this);
     }
 
     public void HideTooltip()
     {
         Services.main.HideWorkerTooltip();
+    }
+
+    public void GetResources(int numResources)
+    {
+        resourcesInHand += numResources;
     }
 }

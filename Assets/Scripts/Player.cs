@@ -7,14 +7,14 @@ public class Player {
     public int playerNum;
     public Color color;
     public List<Worker> workers;
-    public bool movedWorkerThisTurn;
+    public Worker workerMovedThisTurn;
 
     public Player(int playerNum_)
     {
         playerNum = playerNum_;
         color = Services.GameManager.playerColors[playerNum - 1];
         workers = new List<Worker>();
-        movedWorkerThisTurn = false;
+        workerMovedThisTurn = null;
     }
 
     public void AddWorker(Tile tile)
@@ -28,6 +28,6 @@ public class Player {
     public void Refresh()
     {
         foreach (Worker worker in workers) worker.Refresh();
-        movedWorkerThisTurn = false;
+        workerMovedThisTurn = null;
     }
 }

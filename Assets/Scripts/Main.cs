@@ -11,6 +11,7 @@ public class Main : Scene<TransitionData> {
     public Player currentActivePlayer;
     public GameObject roundCounter;
     public GameObject workerTooltip;
+    public GameObject tileTooltip;
     private int roundNum;
 
     // Use this for initialization
@@ -31,6 +32,8 @@ public class Main : Scene<TransitionData> {
         CreateSelector();
         roundNum = 0;
         HideWorkerTooltip();
+        SetTileTooltip(Services.MapManager.map[new Hex(0, 0, 0)]);
+        Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
         StartRound();
     }
 
@@ -73,13 +76,23 @@ public class Main : Scene<TransitionData> {
 
     void EndRound()
     {
+        IncrementResources();
         StartRound();
     }
 
-    public void TurnEnd()
+    void IncrementResources()
+    {
+        foreach (Tile tile in Services.MapManager.resourceTiles)
+        {
+            if (tile.containedWorker == null) tile.containedResource.Increment();
+        }
+    }
+
+    public void EndTurn()
     {
         selector.Reset();
-        currentActivePlayer.movedWorkerThisTurn = false;
+        currentActivePlayer.workerMovedThisTurn.EndTurn();
+        currentActivePlayer.workerMovedThisTurn = null;
         Player nextPlayer = DetermineNextPlayer();
         if (nextPlayer == null) EndRound();
         else {
@@ -119,14 +132,37 @@ public class Main : Scene<TransitionData> {
         selector.SetColor();
     }
 
-    public void SetWorkerTooltip(int movesRemaining, int maxMoves)
+    public void ShowWorkerTooltip(Worker worker)
     {
         workerTooltip.SetActive(true);
-        workerTooltip.GetComponent<Text>().text = "Moves: " + movesRemaining + "/" + maxMoves;
+        workerTooltip.GetComponent<Text>().text = 
+            "Moves: " + worker.movesRemaining + "/" + worker.maxMovementPerTurn + "\n" + 
+            "Resources: " + worker.resourcesInHand + "/" + worker.carryingCapacity;
     }
 
     public void HideWorkerTooltip()
     {
         workerTooltip.SetActive(false);
+    }
+
+    public void SetTileTooltip(Tile tile)
+    {
+        if (tile.containedResource != null)
+        {
+            tileTooltip.GetComponent<Text>().text = "Tile Resources: " + tile.containedResource.numResources;
+        }
+        else
+        {
+            tileTooltip.GetComponent<Text>().text = "";
+        }
+    }
+
+    void OnButtonPressed(ButtonPressed e)
+    {
+        if (e.playerNum == currentActivePlayer.playerNum && (currentActivePlayer.workerMovedThisTurn != null) && 
+            e.button == "B")
+        {
+            EndTurn();
+        }
     }
 }
