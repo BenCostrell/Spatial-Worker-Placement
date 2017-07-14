@@ -140,12 +140,11 @@ public class Main : Scene<TransitionData> {
         selector.SetColor();
     }
 
-    public void ShowWorkerTooltip(Worker worker)
+    public void ShowWorkerTooltip(string tooltipText)
     {
         workerTooltip.SetActive(true);
-        workerTooltip.GetComponent<Text>().text = 
-            "Moves: " + worker.movesRemaining + "/" + worker.maxMovementPerTurn + "\n" + 
-            "Resources: " + worker.resourcesInHand + "/" + worker.carryingCapacity;
+        
+        workerTooltip.GetComponent<Text>().text = tooltipText;
     }
 
     public void HideWorkerTooltip()
@@ -164,29 +163,12 @@ public class Main : Scene<TransitionData> {
             string toolTipText = "Item - Cost : " + tile.containedItem.cost;
             foreach(KeyValuePair<Item.StatType, int> bonus in tile.containedItem.statBonuses)
             {
-                toolTipText += "\n" + StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
             }
             tileTooltip.GetComponent<Text>().text = toolTipText;
         }
         else {
             tileTooltip.GetComponent<Text>().text = "";
-        }
-    }
-
-    string StatTypeToString(Item.StatType statType)
-    {
-        switch (statType)
-        {
-            case Item.StatType.MovementSpeed:
-                return "Movement Speed";
-            case Item.StatType.CarryingCapacity:
-                return "Carrying Capacity";
-            case Item.StatType.ExtraResourcePickup:
-                return "Extra Resource Pickup";
-            case Item.StatType.ItemDiscount:
-                return "Item Discount";
-            default:
-                return "";
         }
     }
 

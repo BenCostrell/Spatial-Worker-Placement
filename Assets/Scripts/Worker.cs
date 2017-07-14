@@ -24,6 +24,7 @@ public class Worker : MonoBehaviour {
     private int bonusResourcePerPickup;
     private int itemDiscount;
     private List<Item> items;
+    private Dictionary<Item.StatType, int> bonuses;
 
 
     [HideInInspector]
@@ -47,6 +48,7 @@ public class Worker : MonoBehaviour {
         bonusResourcePerPickup = 0;
         itemDiscount = 0;
         items = new List<Item>();
+        bonuses = new Dictionary<Item.StatType, int>();
         PlaceOnTile(tile);
     }
 
@@ -108,6 +110,10 @@ public class Worker : MonoBehaviour {
         {
             GetResources(currentTile.containedResource.GetClaimed(carryingCapacity - resourcesInHand));
         }
+        if (currentTile.containedItem != null && resourcesInHand >= AdjustedItemCost(currentTile.containedItem))
+        {
+            AcquireItem(currentTile.containedItem);
+        }
         Services.main.selector.ShowAppropriateTooltip();
     }
 
@@ -129,7 +135,7 @@ public class Worker : MonoBehaviour {
     {
         selected = true;
         sr.color = (parentPlayer.color + Color.white) / 2;
-        Services.main.ShowWorkerTooltip(this);
+        ShowToolTip();
     }
 
     public void Unselect()
@@ -137,12 +143,20 @@ public class Worker : MonoBehaviour {
         selected = false;
         if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
         else sr.color = parentPlayer.color;
-        Services.main.HideWorkerTooltip();
+        HideTooltip();
     }
 
     public void ShowToolTip()
     {
-        Services.main.ShowWorkerTooltip(this);
+        string tooltipText = "Moves: " + movesRemaining + "/" + maxMovementPerTurn + "\n" +
+            "Resources: " + resourcesInHand + "/" + carryingCapacity;
+
+        foreach (KeyValuePair<Item.StatType, int> bonus in bonuses)
+        {
+            tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+        }
+
+        Services.main.ShowWorkerTooltip(tooltipText);
     }
 
     public void HideTooltip()
@@ -155,11 +169,20 @@ public class Worker : MonoBehaviour {
         resourcesInHand += numResources + bonusResourcePerPickup;
     }
 
-    void AcquireItem(Item item)
+    int AdjustedItemCost(Item item)
     {
+        return Mathf.Max(1, item.cost - itemDiscount);
+    }
+
+    public void AcquireItem(Item item)
+    {
+        item.GetAcquired();
+        resourcesInHand -= AdjustedItemCost(item);
         items.Add(item);
         foreach (KeyValuePair<Item.StatType, int> entry in item.statBonuses)
         {
+            if (!bonuses.ContainsKey(entry.Key)) bonuses[entry.Key] = entry.Value;
+            else bonuses[entry.Key] += entry.Value;
             BoostStat(entry.Key, entry.Value);
         }
     }
