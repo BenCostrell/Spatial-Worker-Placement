@@ -21,6 +21,9 @@ public class Worker : MonoBehaviour {
     public int carryingCapacity;
     [HideInInspector]
     public int resourcesInHand;
+    private int bonusResourcePerPickup;
+    private int itemDiscount;
+    private List<Item> items;
 
 
     [HideInInspector]
@@ -29,6 +32,7 @@ public class Worker : MonoBehaviour {
     public bool movedThisTurn;
     [HideInInspector]
     public bool selected;
+
 
     // Use this for initialization
     public void Init (Player parent, Tile tile) {
@@ -40,6 +44,9 @@ public class Worker : MonoBehaviour {
         movesRemaining = maxMovementPerTurn;
         carryingCapacity = startingCarryingCapacity;
         resourcesInHand = 0;
+        bonusResourcePerPickup = 0;
+        itemDiscount = 0;
+        items = new List<Item>();
         PlaceOnTile(tile);
     }
 
@@ -145,6 +152,36 @@ public class Worker : MonoBehaviour {
 
     public void GetResources(int numResources)
     {
-        resourcesInHand += numResources;
+        resourcesInHand += numResources + bonusResourcePerPickup;
+    }
+
+    void AcquireItem(Item item)
+    {
+        items.Add(item);
+        foreach (KeyValuePair<Item.StatType, int> entry in item.statBonuses)
+        {
+            BoostStat(entry.Key, entry.Value);
+        }
+    }
+
+    void BoostStat(Item.StatType statType, int amount)
+    {
+        switch (statType)
+        {
+            case Item.StatType.MovementSpeed:
+                maxMovementPerTurn += amount;
+                break;
+            case Item.StatType.CarryingCapacity:
+                carryingCapacity += amount;
+                break;
+            case Item.StatType.ExtraResourcePickup:
+                bonusResourcePerPickup += amount;
+                break;
+            case Item.StatType.ItemDiscount:
+                itemDiscount += amount;
+                break;
+            default:
+                break;
+        }
     }
 }

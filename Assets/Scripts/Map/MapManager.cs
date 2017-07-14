@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class MapManager : MonoBehaviour {
 
@@ -9,12 +10,19 @@ public class MapManager : MonoBehaviour {
     public int resourceTilesMax;
     public int resourceAmtMin;
     public int resourceAmtMax;
-    public int maxTriesResourceGen;
+    public int maxTriesProcGen;
     public int minDistResourceTiles;
     public int minRadiusResourceTiles;
 
+    public int minRadiusItems;
+    public int minDistItems;
+    public int numItems;
+    public int itemDistAntivariance;
+
     [HideInInspector]
     public List<Tile> resourceTiles;
+    [HideInInspector]
+    public List<Tile> itemTiles;
     [HideInInspector]
     public readonly Layout layout = new Layout(Orientation.pointy, Vector2.one, Vector2.zero);
     [HideInInspector]
@@ -49,6 +57,7 @@ public class MapManager : MonoBehaviour {
         }
         LogAllNeighbors();
         GenerateStartingResources();
+        GenerateStartingItems();
     }
 
     void LogAllNeighbors()
@@ -77,16 +86,45 @@ public class MapManager : MonoBehaviour {
         }
     }
 
+    void GenerateStartingItems()
+    {
+        itemTiles = new List<Tile>();
+        for (int i = 0; i < numItems; i++)
+        {
+            Item item = GenerateAndPlaceItem();
+            if (item == null) break;
+        }
+    }
+
+    Item GenerateAndPlaceItem()
+    {
+        for (int i = 0; i < maxTriesProcGen; i++)
+        {
+            Tile tile = GenerateCandidateTile();
+            bool isValid = ValidateItemTile(tile);
+            if (isValid)
+            {
+                Item item = GenerateItem(2, 5, tile);
+                itemTiles.Add(tile);
+                tile.containedItem = item;
+                return item;
+            }
+        }
+        Debug.Log("stopping after too many tries");
+        return null;
+    }
+
     Tile GenerateResourceTile()
     {
         Tile candidateTile;
-        for (int i = 0; i < maxTriesResourceGen; i++)
+        for (int i = 0; i < maxTriesProcGen; i++)
         {
-            candidateTile = GenerateCandidateResourceTile();
+            candidateTile = GenerateCandidateTile();
             bool isValid = ValidateResourceTile(candidateTile);
             if (isValid)
             {
-                Resource resource = Instantiate(Services.Prefabs.Resource).GetComponent<Resource>();
+                Resource resource = Instantiate(Services.Prefabs.Resource, 
+                    Services.SceneStackManager.CurrentScene.transform).GetComponent<Resource>();
                 int resourceValue = Random.Range(resourceAmtMin, resourceAmtMax + 1);
                 resource.Init(resourceValue, candidateTile);
                 candidateTile.containedResource = resource;
@@ -96,7 +134,7 @@ public class MapManager : MonoBehaviour {
         return null;
     }
 
-    Tile GenerateCandidateResourceTile()
+    Tile GenerateCandidateTile()
     {
         int index = Random.Range(0, keys.Count);
         Hex hex = keys[index];
@@ -114,5 +152,53 @@ public class MapManager : MonoBehaviour {
             }
         }
         return true;
+    }
+
+    bool ValidateItemTile(Tile candidateTile)
+    {
+        if (candidateTile.hex.Length() < minRadiusItems) return false;
+        List<Tile> tilesWithStuff = new List<Tile>(resourceTiles.Concat(itemTiles));
+        foreach(Tile tile in tilesWithStuff)
+        {
+            if (candidateTile.hex.Distance(tile.hex) < minDistItems) return false;
+        }
+        return true;
+    }
+
+    Item GenerateItem(int min, int max, Tile tile)
+    {
+        int typeNumRandomizer = Random.Range(0, 100);
+        int numTypes;
+        if (typeNumRandomizer < 66) numTypes = 1;
+        else numTypes = 2;
+        List<Item.StatType> statTypes = new List<Item.StatType>();
+        for (int i = 0; i < numTypes; i++)
+        {
+            int randomIndex = Random.Range(0, Item.statTypes.Count);
+            statTypes.Add(Item.statTypes[randomIndex]);
+        }
+        Dictionary<Item.StatType, int> bonuses = new Dictionary<Item.StatType, int>();
+        int targetValue = Distribution(min, max, itemDistAntivariance);
+        int cost = 0;
+        while(cost < targetValue)
+        {
+            int index = Random.Range(0, numTypes);
+            Item.StatType stat = statTypes[index];
+            if (!bonuses.ContainsKey(stat)) bonuses[stat] = 1;
+            else bonuses[stat] += 1;
+            cost += Item.costPerStat[stat];
+        }
+        return new Item(bonuses, tile);
+    }
+
+    int Distribution(int min, int max, int antivariance)
+    {
+        int result = 0;
+        for (int i = 0; i < antivariance; i++)
+        {
+            result += Random.Range(min, max + 1);
+        }
+        result = result / antivariance;
+        return result;
     }
 }

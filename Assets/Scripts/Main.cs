@@ -88,6 +88,14 @@ public class Main : Scene<TransitionData> {
         }
     }
 
+    void DecrementItemCosts()
+    {
+        foreach (Tile tile in Services.MapManager.itemTiles)
+        {
+            if (tile.containedItem.cost > 1) tile.containedItem.DecrementCost();
+        }
+    }
+
     public void EndTurn()
     {
         selector.Reset();
@@ -151,9 +159,34 @@ public class Main : Scene<TransitionData> {
         {
             tileTooltip.GetComponent<Text>().text = "Tile Resources: " + tile.containedResource.numResources;
         }
-        else
+        else if (tile.containedItem != null)
         {
+            string toolTipText = "Item - Cost : " + tile.containedItem.cost;
+            foreach(KeyValuePair<Item.StatType, int> bonus in tile.containedItem.statBonuses)
+            {
+                toolTipText += "\n" + StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            }
+            tileTooltip.GetComponent<Text>().text = toolTipText;
+        }
+        else {
             tileTooltip.GetComponent<Text>().text = "";
+        }
+    }
+
+    string StatTypeToString(Item.StatType statType)
+    {
+        switch (statType)
+        {
+            case Item.StatType.MovementSpeed:
+                return "Movement Speed";
+            case Item.StatType.CarryingCapacity:
+                return "Carrying Capacity";
+            case Item.StatType.ExtraResourcePickup:
+                return "Extra Resource Pickup";
+            case Item.StatType.ItemDiscount:
+                return "Item Discount";
+            default:
+                return "";
         }
     }
 
