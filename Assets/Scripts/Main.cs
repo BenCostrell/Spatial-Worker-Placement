@@ -13,6 +13,9 @@ public class Main : Scene<TransitionData> {
     public GameObject workerTooltip;
     public GameObject tileTooltip;
     private int roundNum;
+    [HideInInspector]
+    public List<Building> buildings;
+    public int numBuildingClaimsToWin;
 
     // Use this for initialization
     void Start () {
@@ -76,7 +79,9 @@ public class Main : Scene<TransitionData> {
 
     void EndRound()
     {
+        DecrementBuildings();
         IncrementResources();
+        DecrementItemCosts();
         StartRound();
     }
 
@@ -92,7 +97,15 @@ public class Main : Scene<TransitionData> {
     {
         foreach (Tile tile in Services.MapManager.itemTiles)
         {
-            if (tile.containedItem.cost > 1) tile.containedItem.DecrementCost();
+            tile.containedItem.DecrementCost();
+        }
+    }
+
+    void DecrementBuildings()
+    {
+        foreach(Tile tile in Services.MapManager.buildingTiles)
+        {
+            tile.containedBuilding.Decrement();
         }
     }
 
@@ -179,5 +192,21 @@ public class Main : Scene<TransitionData> {
         {
             EndTurn();
         }
+    }
+
+    public void CheckForWin()
+    {
+        foreach(Player player in Services.GameManager.players)
+        {
+            if (player.claimedBuildings.Count >= numBuildingClaimsToWin)
+            {
+                GameWin(player);
+            }
+        }
+    }
+
+    void GameWin(Player player)
+    {
+        Debug.Log("player " + player.playerNum + " has won");
     }
 }

@@ -114,6 +114,10 @@ public class Worker : MonoBehaviour {
         {
             AcquireItem(currentTile.containedItem);
         }
+        if (currentTile.containedBuilding != null)
+        {
+            ClaimBuilding(currentTile.containedBuilding);
+        }
         Services.main.selector.ShowAppropriateTooltip();
     }
 
@@ -185,6 +189,12 @@ public class Worker : MonoBehaviour {
             else bonuses[entry.Key] += entry.Value;
             BoostStat(entry.Key, entry.Value);
         }
+    }
+
+    public void ClaimBuilding(Building building)
+    {
+        building.GetClaimed(parentPlayer, resourcesInHand);
+        resourcesInHand = 0;
     }
 
     void BoostStat(Item.StatType statType, int amount)

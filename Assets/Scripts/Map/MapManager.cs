@@ -24,6 +24,9 @@ public class MapManager : MonoBehaviour {
     [HideInInspector]
     public List<Tile> itemTiles;
     [HideInInspector]
+    public List<Tile> buildingTiles;
+    private List<Tile> occupiedTiles;
+    [HideInInspector]
     public readonly Layout layout = new Layout(Orientation.pointy, Vector2.one, Vector2.zero);
     [HideInInspector]
     public Dictionary<Hex, Tile> map;
@@ -44,6 +47,7 @@ public class MapManager : MonoBehaviour {
     {
         map = new Dictionary<Hex, Tile>();
         keys = new List<Hex>();
+        occupiedTiles = new List<Tile>();
         for (int q = -radius; q <= radius; q++)
         {
             int r1 = Mathf.Max(-radius, -q - radius);
@@ -56,6 +60,7 @@ public class MapManager : MonoBehaviour {
             }
         }
         LogAllNeighbors();
+        GenerateBuildings();
         GenerateStartingResources();
         GenerateStartingItems();
     }
@@ -81,7 +86,11 @@ public class MapManager : MonoBehaviour {
         for (int i = 0; i < numResourceTiles; i++)
         {
             Tile resourceTile = GenerateResourceTile();
-            if (resourceTile != null) resourceTiles.Add(resourceTile);
+            if (resourceTile != null)
+            {
+                resourceTiles.Add(resourceTile);
+                occupiedTiles.Add(resourceTile);
+            }
             else break;
         }
     }
@@ -98,38 +107,41 @@ public class MapManager : MonoBehaviour {
 
     Item GenerateAndPlaceItem()
     {
-        for (int i = 0; i < maxTriesProcGen; i++)
+        Tile tile = GenerateValidTile(minRadiusItems, minDistItems);
+        if (tile != null)
         {
-            Tile tile = GenerateCandidateTile();
-            bool isValid = ValidateItemTile(tile);
-            if (isValid)
-            {
-                Item item = GenerateItem(2, 5, tile);
-                itemTiles.Add(tile);
-                tile.containedItem = item;
-                return item;
-            }
+            Item item = GenerateItem(2, 5, tile);
+            itemTiles.Add(tile);
+            occupiedTiles.Add(tile);
+            tile.containedItem = item;
+            return item;
         }
-        Debug.Log("stopping after too many tries");
-        return null;
+        else return null;
     }
 
     Tile GenerateResourceTile()
     {
-        Tile candidateTile;
+        Tile tile = GenerateValidTile(minRadiusResourceTiles, minDistResourceTiles);
+        if (tile != null)
+        {
+            Resource resource = Instantiate(Services.Prefabs.Resource,
+                    Services.SceneStackManager.CurrentScene.transform).GetComponent<Resource>();
+            int resourceValue = Random.Range(resourceAmtMin, resourceAmtMax + 1);
+            resource.Init(resourceValue, tile);
+            tile.containedResource = resource;
+            return tile;
+        }
+        else return null;
+    }
+
+    Tile GenerateValidTile(int minRadius, int minDist)
+    {
+        Tile tile = GenerateCandidateTile();
         for (int i = 0; i < maxTriesProcGen; i++)
         {
-            candidateTile = GenerateCandidateTile();
-            bool isValid = ValidateResourceTile(candidateTile);
-            if (isValid)
-            {
-                Resource resource = Instantiate(Services.Prefabs.Resource, 
-                    Services.SceneStackManager.CurrentScene.transform).GetComponent<Resource>();
-                int resourceValue = Random.Range(resourceAmtMin, resourceAmtMax + 1);
-                resource.Init(resourceValue, candidateTile);
-                candidateTile.containedResource = resource;
-                return candidateTile;
-            }
+            tile = GenerateCandidateTile();
+            bool isValid = ValidateTile(tile, minRadius, minDist);
+            if (isValid) return tile;
         }
         return null;
     }
@@ -141,26 +153,16 @@ public class MapManager : MonoBehaviour {
         return map[hex];
     }
 
-    bool ValidateResourceTile(Tile candidateTile)
+    bool ValidateTile(Tile candidateTile, int minRadius, int minDist)
     {
-        if (candidateTile.hex.Length() < minRadiusResourceTiles) return false;
-        if (resourceTiles.Count == 0) return true;
-        else {
-            foreach (Tile tile in resourceTiles)
-            {
-                if (candidateTile.hex.Distance(tile.hex) < minDistResourceTiles) return false;
-            }
-        }
-        return true;
-    }
-
-    bool ValidateItemTile(Tile candidateTile)
-    {
-        if (candidateTile.hex.Length() < minRadiusItems) return false;
-        List<Tile> tilesWithStuff = new List<Tile>(resourceTiles.Concat(itemTiles));
-        foreach(Tile tile in tilesWithStuff)
+        if (candidateTile.hex.Length() < minRadius) return false;
+        if (occupiedTiles.Count == 0) return true;
+        else
         {
-            if (candidateTile.hex.Distance(tile.hex) < minDistItems) return false;
+            foreach (Tile tile in occupiedTiles)
+            {
+                if (candidateTile.hex.Distance(tile.hex) < minDist) return false;
+            }
         }
         return true;
     }
@@ -200,5 +202,29 @@ public class MapManager : MonoBehaviour {
         }
         result = result / antivariance;
         return result;
+    }
+
+    void GenerateBuildings()
+    {
+        buildingTiles = new List<Tile>();
+        Services.main.buildings = new List<Building>();
+        for (int i = 0; i < 6; i++)
+        {
+            Hex hexCoord = Hex.Direction(i).Multiply(radius);
+            Tile tile = GenerateAndPlaceBuilding(hexCoord);
+            buildingTiles.Add(tile);
+            occupiedTiles.Add(tile);
+        }
+    }
+
+    Tile GenerateAndPlaceBuilding(Hex coord)
+    {
+        Building building = Instantiate(Services.Prefabs.Building, 
+            Services.SceneStackManager.CurrentScene.transform).GetComponent<Building>();
+        Tile tile = map[coord];
+        building.Init(tile);
+        tile.containedBuilding = building;
+        Services.main.buildings.Add(building);
+        return tile;
     }
 }

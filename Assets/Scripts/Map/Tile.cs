@@ -11,6 +11,7 @@ public class Tile
     public List<Tile> neighbors;
     public Worker containedWorker;
     public Resource containedResource;
+    public Building containedBuilding;
     public Item containedItem;
 
     public Tile(Hex hex_)

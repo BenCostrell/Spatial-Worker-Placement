@@ -9,7 +9,16 @@ public class Item
     private Tile parentTile;
     public enum StatType { MovementSpeed, CarryingCapacity, ExtraResourcePickup, ItemDiscount }
     public readonly Dictionary<StatType, int> statBonuses;
-    public int cost;
+    private int cost_;
+    public int cost
+    {
+        get { return cost_; }
+        private set
+        {
+            cost_ = value;
+            costText.text = value.ToString();
+        }
+    }
     public static readonly Dictionary<StatType, int> costPerStat = new Dictionary<StatType, int>()
     {
         { StatType.MovementSpeed, 5 },
@@ -26,9 +35,8 @@ public class Item
         obj = GameObject.Instantiate(Services.Prefabs.Item, Services.SceneStackManager.CurrentScene.transform);
         obj.transform.position = tile.hex.ScreenPos();
         parentTile = tile;
-        cost = GetValue(statBonuses) + startingPriceBump;
         costText = obj.GetComponentInChildren<TextMesh>();
-        costText.text = cost.ToString();
+        cost = GetValue(statBonuses) + startingPriceBump;
     }
 
     public static int GetValue(Dictionary<StatType, int> bonuses)
@@ -67,7 +75,6 @@ public class Item
 
     public void DecrementCost()
     {
-        cost -= 1;
-        costText.text = cost.ToString();
+        if (cost > 1) cost -= 1;
     }
 }
