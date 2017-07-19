@@ -18,6 +18,8 @@ public class MapManager : MonoBehaviour {
     public int minDistItems;
     public int numItems;
     public int itemDistAntivariance;
+    public int approxMinStartingItemVal;
+    public int approxMaxStartingItemVal;
 
     [HideInInspector]
     public List<Tile> resourceTiles;
@@ -100,23 +102,25 @@ public class MapManager : MonoBehaviour {
         itemTiles = new List<Tile>();
         for (int i = 0; i < numItems; i++)
         {
-            Item item = GenerateAndPlaceItem();
+            Item item = GenerateAndPlaceItem(approxMinStartingItemVal, approxMaxStartingItemVal, minRadiusItems);
             if (item == null) break;
         }
     }
 
-    Item GenerateAndPlaceItem()
+    Item GenerateAndPlaceItem(int approxMinVal, int approxMaxVal, int minRadius)
     {
-        Tile tile = GenerateValidTile(minRadiusItems, minDistItems);
+        Tile tile = GenerateValidTile(minRadius, minDistItems);
         if (tile != null)
         {
-            Item item = GenerateItem(2, 5, tile);
+            Item item = GenerateItem(approxMinVal, approxMaxVal, tile);
             itemTiles.Add(tile);
             occupiedTiles.Add(tile);
             tile.containedItem = item;
+            Debug.Log("made item");
             return item;
         }
-        else return null;
+        Debug.Log("failed to make item");
+        return null;
     }
 
     Tile GenerateResourceTile()
@@ -155,19 +159,13 @@ public class MapManager : MonoBehaviour {
 
     bool ValidateTile(Tile candidateTile, int minRadius, int minDist)
     {
-        if (candidateTile.hex.Length() < minRadius) return false;
+        if (candidateTile.hex.Length() < minRadius || candidateTile.containedWorker != null) return false;
         if (occupiedTiles.Count == 0) return true;
-        else
-        {
-            foreach (Tile tile in occupiedTiles)
-            {
-                if (candidateTile.hex.Distance(tile.hex) < minDist) return false;
-            }
-        }
+        else foreach (Tile tile in occupiedTiles) if (candidateTile.hex.Distance(tile.hex) < minDist) return false;
         return true;
     }
 
-    Item GenerateItem(int min, int max, Tile tile)
+    Item GenerateItem(int approxMinVal, int approxMaxVal, Tile tile)
     {
         int typeNumRandomizer = Random.Range(0, 100);
         int numTypes;
@@ -180,7 +178,7 @@ public class MapManager : MonoBehaviour {
             statTypes.Add(Item.statTypes[randomIndex]);
         }
         Dictionary<Item.StatType, int> bonuses = new Dictionary<Item.StatType, int>();
-        int targetValue = Distribution(min, max, itemDistAntivariance);
+        int targetValue = Distribution(approxMinVal, approxMaxVal, itemDistAntivariance);
         int cost = 0;
         while(cost < targetValue)
         {
@@ -226,5 +224,13 @@ public class MapManager : MonoBehaviour {
         tile.containedBuilding = building;
         Services.main.buildings.Add(building);
         return tile;
+    }
+
+    public void SpawnNewItems(int approxMinVal, int approxMaxVal)
+    {
+        int numNewItems = numItems - itemTiles.Count;
+        Debug.Log(numNewItems);
+        if (numNewItems > 0) for (int i = 0; i < numNewItems; i++)
+                GenerateAndPlaceItem(approxMinVal, approxMaxVal, 0);
     }
 }

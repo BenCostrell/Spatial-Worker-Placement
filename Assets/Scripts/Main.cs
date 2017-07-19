@@ -82,6 +82,7 @@ public class Main : Scene<TransitionData> {
         DecrementBuildings();
         IncrementResources();
         DecrementItemCosts();
+        Services.MapManager.SpawnNewItems(2, 5);
         StartRound();
     }
 
