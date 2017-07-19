@@ -69,6 +69,7 @@ public class Item
     public void GetAcquired()
     {
         obj.SetActive(false);
+        Services.MapManager.itemTiles.Remove(parentTile);
         parentTile.containedItem = null;
         parentTile = null;
     }
