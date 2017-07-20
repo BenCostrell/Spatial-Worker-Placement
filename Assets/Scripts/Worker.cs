@@ -25,6 +25,7 @@ public class Worker : MonoBehaviour {
     private int itemDiscount;
     private List<Item> items;
     private Dictionary<Item.StatType, int> bonuses;
+    private Dictionary<Item.StatType, int> tempBonuses;
 
 
     [HideInInspector]
@@ -49,6 +50,7 @@ public class Worker : MonoBehaviour {
         itemDiscount = 0;
         items = new List<Item>();
         bonuses = new Dictionary<Item.StatType, int>();
+        tempBonuses = new Dictionary<Item.StatType, int>();
         PlaceOnTile(tile);
     }
 
@@ -155,10 +157,24 @@ public class Worker : MonoBehaviour {
         string tooltipText = "Moves: " + movesRemaining + "/" + maxMovementPerTurn + "\n" +
             "Resources: " + resourcesInHand + "/" + carryingCapacity;
 
-        foreach (KeyValuePair<Item.StatType, int> bonus in bonuses)
+        if (bonuses.Count > 0)
         {
-            tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            tooltipText += "\nItem Bonuses:";
+            foreach (KeyValuePair<Item.StatType, int> bonus in bonuses)
+            {
+                tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            }
         }
+        
+        if (tempBonuses.Count > 0)
+        {
+            tooltipText += "\nBuilding Bonuses:";
+            foreach (KeyValuePair<Item.StatType, int> bonus in tempBonuses)
+            {
+                tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            }
+        }
+        
 
         Services.main.ShowWorkerTooltip(tooltipText);
     }
@@ -187,7 +203,34 @@ public class Worker : MonoBehaviour {
         {
             if (!bonuses.ContainsKey(entry.Key)) bonuses[entry.Key] = entry.Value;
             else bonuses[entry.Key] += entry.Value;
-            BoostStat(entry.Key, entry.Value);
+            AlterStat(entry.Key, entry.Value);
+        }
+    }
+
+    public void GetTempBonuses(Dictionary<Item.StatType, int> tempBonuses_)
+    {
+        foreach (KeyValuePair<Item.StatType, int> entry in tempBonuses_)
+        {
+            if (!tempBonuses.ContainsKey(entry.Key)) tempBonuses[entry.Key] = entry.Value;
+            else tempBonuses[entry.Key] += entry.Value;
+            AlterStat(entry.Key, entry.Value);
+        }
+    }
+
+    public void LoseTempBonuses(Dictionary<Item.StatType, int> tempBonuses_)
+    {
+        List<Item.StatType> completelyLostStats = new List<Item.StatType>();
+        foreach (KeyValuePair<Item.StatType, int> entry in tempBonuses_)
+        {
+            tempBonuses[entry.Key] -= entry.Value;
+            if (tempBonuses[entry.Key] == 0) completelyLostStats.Add(entry.Key);
+            AlterStat(entry.Key, -entry.Value);
+        }
+        if (completelyLostStats.Count > 0) {
+            foreach(Item.StatType stat in completelyLostStats)
+            {
+                tempBonuses.Remove(stat);
+            }
         }
     }
 
@@ -197,7 +240,7 @@ public class Worker : MonoBehaviour {
         resourcesInHand = 0;
     }
 
-    void BoostStat(Item.StatType statType, int amount)
+    public void AlterStat(Item.StatType statType, int amount)
     {
         switch (statType)
         {

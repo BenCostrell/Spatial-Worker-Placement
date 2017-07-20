@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Player {
 
-    public int playerNum;
-    public Color color;
+    public readonly int playerNum;
+    public readonly Color color;
+    public readonly string name;
     public List<Worker> workers;
     public Worker workerMovedThisTurn;
     public List<Building> claimedBuildings;
@@ -14,6 +15,7 @@ public class Player {
     {
         playerNum = playerNum_;
         color = Services.GameManager.playerColors[playerNum - 1];
+        name = Services.GameManager.playerNames[playerNum - 1];
         workers = new List<Worker>();
         claimedBuildings = new List<Building>();
         workerMovedThisTurn = null;

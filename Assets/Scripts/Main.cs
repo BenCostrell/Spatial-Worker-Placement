@@ -168,22 +168,38 @@ public class Main : Scene<TransitionData> {
 
     public void SetTileTooltip(Tile tile)
     {
+        string toolTipText = "";
         if (tile.containedResource != null)
         {
-            tileTooltip.GetComponent<Text>().text = "Tile Resources: " + tile.containedResource.numResources;
+            toolTipText = "Tile Resources: " + tile.containedResource.numResources;
         }
         else if (tile.containedItem != null)
         {
-            string toolTipText = "Item - Cost : " + tile.containedItem.cost;
+            toolTipText = "Item - Cost : " + tile.containedItem.cost;
             foreach(KeyValuePair<Item.StatType, int> bonus in tile.containedItem.statBonuses)
             {
                 toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
             }
-            tileTooltip.GetComponent<Text>().text = toolTipText;
         }
-        else {
-            tileTooltip.GetComponent<Text>().text = "";
+        else if (tile.containedBuilding != null) {
+            toolTipText = "Building : \n";
+            if (tile.containedBuilding.controller == null)
+            {
+                toolTipText += "Neutral \n";
+            }
+            else
+            {
+                toolTipText += "Controlled by " + tile.containedBuilding.controller.name + "\n" +
+                    tile.containedBuilding.turnsLeft + " rounds left \n";
+            }
+            toolTipText += "Bonuses to all controller's workers: ";
+            foreach (KeyValuePair<Item.StatType, int> bonus in tile.containedBuilding.statBonuses)
+            {
+                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            }
         }
+
+        tileTooltip.GetComponent<Text>().text = toolTipText;
     }
 
     void OnButtonPressed(ButtonPressed e)

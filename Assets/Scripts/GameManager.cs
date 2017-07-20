@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour {
     public List<Player> players;
     public Vector3[] workerSpawns;
     public Color[] playerColors;
+    public string[] playerNames;
 
 	void Awake()
     {

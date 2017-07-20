@@ -220,7 +220,10 @@ public class MapManager : MonoBehaviour {
         Building building = Instantiate(Services.Prefabs.Building, 
             Services.SceneStackManager.CurrentScene.transform).GetComponent<Building>();
         Tile tile = map[coord];
-        building.Init(tile);
+        Dictionary<Item.StatType, int> statBonuses = new Dictionary<Item.StatType, int>();
+        Item.StatType statType = Item.statTypes[Random.Range(0, Item.statTypes.Count)];
+        statBonuses[statType] = 1;
+        building.Init(tile, statBonuses);
         tile.containedBuilding = building;
         Services.main.buildings.Add(building);
         return tile;
