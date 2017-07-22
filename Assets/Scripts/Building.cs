@@ -5,6 +5,7 @@ using UnityEngine;
 public class Building : MonoBehaviour {
 
     public Color defaultColor;
+    public Vector2 offset;
     private SpriteRenderer sr;
     private TextMesh textMesh;
     private Player controller_;
@@ -37,10 +38,11 @@ public class Building : MonoBehaviour {
     {
         sr = GetComponent<SpriteRenderer>();
         textMesh = GetComponentInChildren<TextMesh>();
+        textMesh.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         sr.color = defaultColor;
         turnsLeft = 0;
         parentTile = tile;
-        transform.position = tile.hex.ScreenPos();
+        transform.position = tile.hex.ScreenPos() + offset;
         statBonuses = statBonuses__;
     }
 

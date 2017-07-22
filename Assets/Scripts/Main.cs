@@ -16,6 +16,9 @@ public class Main : Scene<TransitionData> {
     [HideInInspector]
     public List<Building> buildings;
     public int numBuildingClaimsToWin;
+    public float resGainAnimOffset;
+    public float resGainAnimDur;
+    public float resGainAnimDist;
 
     // Use this for initialization
     void Start () {

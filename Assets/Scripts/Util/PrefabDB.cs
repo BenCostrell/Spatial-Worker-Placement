@@ -31,4 +31,8 @@ public class PrefabDB : ScriptableObject {
     [SerializeField]
     private GameObject building;
     public GameObject Building { get { return building; } }
+
+    [SerializeField]
+    private GameObject resourceGainText;
+    public GameObject ResourceGainText { get { return resourceGainText; } }
 }

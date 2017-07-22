@@ -19,6 +19,7 @@ public class Selector : MonoBehaviour
         timeSinceLastUniqueInput = 0;
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
         tilePath = new List<Tile>();
+        transform.localScale = Services.MapManager.layout.size;
     }
 
     // Update is called once per frame

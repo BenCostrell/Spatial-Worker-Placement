@@ -29,7 +29,7 @@ public class MapManager : MonoBehaviour {
     public List<Tile> buildingTiles;
     private List<Tile> occupiedTiles;
     [HideInInspector]
-    public readonly Layout layout = new Layout(Orientation.pointy, Vector2.one, Vector2.zero);
+    public readonly Layout layout = new Layout(Orientation.pointy, new Vector2(1, 0.6f), Vector2.zero);
     [HideInInspector]
     public Dictionary<Hex, Tile> map;
     private List<Hex> keys;
@@ -57,7 +57,9 @@ public class MapManager : MonoBehaviour {
             for (int r = r1; r <= r2; r++)
             {
                 Hex hex = new Hex(q, r, -q - r);
-                map.Add(hex, new Tile(hex));
+                Tile tile = new Tile(hex);
+                tile.obj.transform.localScale = layout.size;
+                map.Add(hex, tile);
                 keys.Add(hex);
             }
         }
@@ -213,6 +215,9 @@ public class MapManager : MonoBehaviour {
             buildingTiles.Add(tile);
             occupiedTiles.Add(tile);
         }
+        Tile centerTile = GenerateAndPlaceBuilding(new Hex(0, 0, 0));
+        buildingTiles.Add(centerTile);
+        occupiedTiles.Add(centerTile);
     }
 
     Tile GenerateAndPlaceBuilding(Hex coord)

@@ -23,6 +23,7 @@ public class Resource : MonoBehaviour {
     public void Init(int numResources_, Tile tile_)
     {
         counter = GetComponentInChildren<TextMesh>();
+        counter.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         numResources = numResources_;
         tile = tile_;
         transform.position = tile.hex.ScreenPos();

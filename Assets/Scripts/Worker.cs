@@ -110,7 +110,8 @@ public class Worker : MonoBehaviour {
     {
         if (currentTile.containedResource != null && resourcesInHand < carryingCapacity)
         {
-            GetResources(currentTile.containedResource.GetClaimed(carryingCapacity - resourcesInHand));
+            GetResources(currentTile.containedResource.GetClaimed(
+                carryingCapacity - resourcesInHand - bonusResourcePerPickup));
         }
         if (currentTile.containedItem != null && resourcesInHand >= AdjustedItemCost(currentTile.containedItem))
         {
@@ -186,7 +187,9 @@ public class Worker : MonoBehaviour {
 
     public void GetResources(int numResources)
     {
-        resourcesInHand += numResources + bonusResourcePerPickup;
+        int gain = numResources + bonusResourcePerPickup;
+        resourcesInHand += gain;
+        taskManager.AddTask(new ResourceAcquisitionAnimation(currentTile, gain));
     }
 
     int AdjustedItemCost(Item item)

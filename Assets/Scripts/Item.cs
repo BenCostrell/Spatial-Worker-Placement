@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class Item
 {
     private GameObject obj;
+    private readonly Vector2 offset = 0.3f * Vector2.up;
     private TextMesh costText;
     private Tile parentTile;
     public enum StatType { MovementSpeed, CarryingCapacity, ExtraResourcePickup, ItemDiscount }
@@ -33,9 +34,10 @@ public class Item
     {
         statBonuses = statBonuses_;
         obj = GameObject.Instantiate(Services.Prefabs.Item, Services.SceneStackManager.CurrentScene.transform);
-        obj.transform.position = tile.hex.ScreenPos();
+        obj.transform.position = tile.hex.ScreenPos() + offset;
         parentTile = tile;
         costText = obj.GetComponentInChildren<TextMesh>();
+        costText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         cost = GetValue(statBonuses) + startingPriceBump;
     }
 
