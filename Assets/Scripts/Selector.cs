@@ -138,9 +138,10 @@ public class Selector : MonoBehaviour
         {
             ClearPath();
             tilePath = newPath;
+            selectedWorker.ShowPathArrow(tilePath);
             foreach (Tile tile in tilePath)
             {
-                tile.obj.GetComponent<SpriteRenderer>().color = Color.gray;
+                //tile.obj.GetComponent<SpriteRenderer>().color = Color.gray;
             }
         }
     }
@@ -159,7 +160,7 @@ public class Selector : MonoBehaviour
         {
             foreach (Tile tile in tilePath)
             {
-                tile.obj.GetComponent<SpriteRenderer>().color = Color.white;
+                //tile.obj.GetComponent<SpriteRenderer>().color = Color.white;
             }
         }
         tilePath = new List<Tile>();

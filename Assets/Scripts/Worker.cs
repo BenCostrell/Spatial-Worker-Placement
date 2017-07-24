@@ -8,6 +8,9 @@ public class Worker : MonoBehaviour {
     public Player parentPlayer;
     [HideInInspector]
     public Tile currentTile;
+    private LineRenderer lr;
+    private GameObject arrowHead;
+    private List<Tile> availableGoals;
     public float tileHopTime;
     private TaskManager taskManager;
     private SpriteRenderer sr;
@@ -41,6 +44,9 @@ public class Worker : MonoBehaviour {
         parentPlayer = parent;
         taskManager = new TaskManager();
         sr = GetComponent<SpriteRenderer>();
+        lr = GetComponentInChildren<LineRenderer>();
+        arrowHead = lr.gameObject;
+        arrowHead.SetActive(false);
         sr.color = parentPlayer.color;
         maxMovementPerTurn = startingMaxMovement;
         movesRemaining = maxMovementPerTurn;
@@ -49,6 +55,7 @@ public class Worker : MonoBehaviour {
         bonusResourcePerPickup = 0;
         itemDiscount = 0;
         items = new List<Item>();
+        availableGoals = new List<Tile>();
         bonuses = new Dictionary<Item.StatType, int>();
         tempBonuses = new Dictionary<Item.StatType, int>();
         PlaceOnTile(tile);
@@ -122,6 +129,8 @@ public class Worker : MonoBehaviour {
             ClaimBuilding(currentTile.containedBuilding);
         }
         Services.main.selector.ShowAppropriateTooltip();
+
+        if (!AnyAvailableActions()) Services.main.EndTurn();
     }
 
     public void EndTurn()
@@ -142,6 +151,7 @@ public class Worker : MonoBehaviour {
     {
         selected = true;
         sr.color = (parentPlayer.color + Color.white) / 2;
+        HighlightAvailableMoves();
         ShowToolTip();
     }
 
@@ -150,7 +160,9 @@ public class Worker : MonoBehaviour {
         selected = false;
         if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
         else sr.color = parentPlayer.color;
+        ClearAvailableMoves();
         HideTooltip();
+        arrowHead.SetActive(false);
     }
 
     public void ShowToolTip()
@@ -262,5 +274,61 @@ public class Worker : MonoBehaviour {
             default:
                 break;
         }
+    }
+
+    void HighlightAvailableMoves()
+    {
+        ClearAvailableMoves();
+        availableGoals = AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining);
+        if (availableGoals.Count > 0)
+        {
+            foreach (Tile tile in availableGoals)
+            {
+                tile.obj.GetComponent<SpriteRenderer>().color = tile.moveAvailableColor;
+            }
+        }
+    }
+
+    void ClearAvailableMoves()
+    {
+        if (availableGoals.Count > 0)
+        {
+            foreach (Tile tile in availableGoals)
+            {
+                tile.obj.GetComponent<SpriteRenderer>().color = Color.white;
+            }
+        }
+        availableGoals = new List<Tile>();
+    }
+
+    public void ShowPathArrow(List<Tile> path)
+    {
+        if (path.Count > 1)
+        {
+            arrowHead.SetActive(true);
+            Vector3[] positions = new Vector3[path.Count];
+            for (int i = 0; i < path.Count; i++)
+            {
+                Vector3 basePos = path[i].hex.ScreenPos();
+                positions[i] = new Vector3(basePos.x, basePos.y, -1);
+                Debug.Log(positions[i]);
+            }
+            lr.positionCount = positions.Length;
+            lr.SetPositions(positions);
+            Vector3 arrowheadBasePos = path[0].hex.ScreenPos();
+            arrowHead.transform.position = new Vector3(arrowheadBasePos.x, arrowheadBasePos.y, -2);
+            Hex direction = Hex.Subtract(path[0].hex, path[1].hex);
+            float angle = Hex.DirectionToAngle(direction) - 30;
+            arrowHead.transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
+        else
+        {
+            arrowHead.SetActive(false);
+        }
+    }
+
+    bool AnyAvailableActions()
+    {
+        return movesRemaining > 0;
     }
 }

@@ -7,12 +7,19 @@ using UnityEngine;
 public class Tile
 {
     public readonly Hex hex;
+    [HideInInspector]
     public GameObject obj;
+    [HideInInspector]
     public List<Tile> neighbors;
+    [HideInInspector]
     public Worker containedWorker;
+    [HideInInspector]
     public Resource containedResource;
+    [HideInInspector]
     public Building containedBuilding;
+    [HideInInspector]
     public Item containedItem;
+    public readonly Color moveAvailableColor = new Color(0.5f, 1f, 0.5f);
 
     public Tile(Hex hex_)
     {

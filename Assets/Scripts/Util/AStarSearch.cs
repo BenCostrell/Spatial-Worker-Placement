@@ -54,6 +54,39 @@ public static class AStarSearch
 
         return path;
     }
+
+    public static List<Tile> FindAllAvailableGoals(Tile start, int movesAvailable)
+    {
+        List<Tile> availableGoals = new List<Tile>();
+        if (movesAvailable == 0) return availableGoals;
+        Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
+        Dictionary<Tile, int> costSoFar = new Dictionary<Tile, int>();
+
+        Queue<Tile> frontier = new Queue<Tile>();
+        frontier.Enqueue(start);
+        cameFrom[start] = start;
+        costSoFar[start] = 0;
+
+        while (frontier.Count > 0)
+        {
+            Tile current = frontier.Dequeue();
+            if (costSoFar[current] <= movesAvailable)
+            {
+                if(current != start) availableGoals.Add(current);
+                foreach (Tile next in current.neighbors)
+                {
+                    int newCost = costSoFar[current] + 1;
+                    if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
+                    {
+                        costSoFar[next] = newCost;
+                        frontier.Enqueue(next);
+                        cameFrom[next] = current;
+                    }
+                }
+            }
+        }
+        return availableGoals;
+    }
 }
 
 public class PriorityQueue<T>

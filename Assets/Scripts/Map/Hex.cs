@@ -100,9 +100,25 @@ public class Hex {
         new Hex(-1, 0, 1), new Hex(-1, 1, 0), new Hex(0, 1, -1)
     };
 
+    static readonly float[] angles = new float[6]
+    {
+        180f, 120f, 60f, 0f, -60f, -120f
+    };
+
     public static Hex Direction(int direction)
     {
         return directions[direction % 6];
+    }
+
+    public static float DirectionToAngle(Hex dir)
+    {
+        int index = -1;
+        for (int i = 0; i < 6; i++)
+        {
+            if (directions[i] == dir) index = i;
+        }
+        if (index == -1) return 0;
+        else return angles[index];
     }
 
     public static Hex Neighbor(Hex a, int direction)
