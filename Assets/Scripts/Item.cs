@@ -8,7 +8,8 @@ public class Item
     private readonly Vector2 offset = 0.3f * Vector2.up;
     private TextMesh costText;
     private Tile parentTile;
-    public enum StatType { MovementSpeed, CarryingCapacity, ExtraResourcePickup, ItemDiscount }
+    public enum StatType { MovementSpeed, CarryingCapacity, ExtraResourcePickup, ItemDiscount, BonusClaimPower,
+        BumpPower }
     public readonly Dictionary<StatType, int> statBonuses;
     private int cost_;
     public int cost
@@ -25,7 +26,9 @@ public class Item
         { StatType.MovementSpeed, 5 },
         { StatType.CarryingCapacity, 2 },
         { StatType.ExtraResourcePickup, 3 },
-        { StatType.ItemDiscount, 2 }
+        { StatType.ItemDiscount, 2 },
+        { StatType.BonusClaimPower, 3 },
+        { StatType.BumpPower, 2 }
     };
     public static readonly List<StatType> statTypes = new List<StatType>(costPerStat.Keys);
     public const int startingPriceBump = 2;
@@ -51,18 +54,22 @@ public class Item
         return value;
     }
 
-    public static string StatTypeToString(Item.StatType statType)
+    public static string StatTypeToString(StatType statType)
     {
         switch (statType)
         {
-            case Item.StatType.MovementSpeed:
+            case StatType.MovementSpeed:
                 return "Movement Speed";
-            case Item.StatType.CarryingCapacity:
+            case StatType.CarryingCapacity:
                 return "Carrying Capacity";
-            case Item.StatType.ExtraResourcePickup:
+            case StatType.ExtraResourcePickup:
                 return "Extra Resource Pickup";
-            case Item.StatType.ItemDiscount:
+            case StatType.ItemDiscount:
                 return "Item Discount";
+            case StatType.BonusClaimPower:
+                return "Bonus Claim Power";
+            case StatType.BumpPower:
+                return "Bump Power";
             default:
                 return "";
         }

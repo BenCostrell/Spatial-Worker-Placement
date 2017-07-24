@@ -26,6 +26,8 @@ public class Worker : MonoBehaviour {
     public int resourcesInHand;
     private int bonusResourcePerPickup;
     private int itemDiscount;
+    private int bonusClaimPower;
+    private int bumpPower;
     private List<Item> items;
     private Dictionary<Item.StatType, int> bonuses;
     private Dictionary<Item.StatType, int> tempBonuses;
@@ -34,9 +36,11 @@ public class Worker : MonoBehaviour {
     [HideInInspector]
     public bool movedThisRound;
     [HideInInspector]
-    public bool movedThisTurn;
-    [HideInInspector]
     public bool selected;
+    [HideInInspector]
+    public Hex lastDirectionMoved;
+    [HideInInspector]
+    public bool midAnimation;
 
 
     // Use this for initialization
@@ -54,6 +58,8 @@ public class Worker : MonoBehaviour {
         resourcesInHand = 0;
         bonusResourcePerPickup = 0;
         itemDiscount = 0;
+        bonusClaimPower = 0;
+        bumpPower = 1;
         items = new List<Item>();
         availableGoals = new List<Tile>();
         bonuses = new Dictionary<Item.StatType, int>();
@@ -64,44 +70,51 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         taskManager.Update();
+        Debug.Assert(movesRemaining < maxMovementPerTurn || parentPlayer.workerMovedThisTurn != this);
 	}
 
     public void PlaceOnTile(Tile tile)
     {
-        if (currentTile != null) currentTile.containedWorker = null;
+        if (currentTile != null && currentTile.containedWorker == this)
+        {
+            currentTile.containedWorker = null;
+        }
         currentTile = tile;
+        Worker prevWorker = tile.containedWorker;
         tile.containedWorker = this;
+        if (prevWorker != null) BumpWorker(prevWorker, lastDirectionMoved);
         transform.position = tile.hex.ScreenPos();
     }
 
-    void AnimateMovementAlongPath(List<Tile> path)
+    void AnimateMovementAlongPath(List<Tile> path, bool forcedMovement)
     {
+        midAnimation = true;
         TaskQueue movementTasks = new TaskQueue();
 
         for (int i = path.Count - 1; i >= 0; i--)
         {
             movementTasks.Add(new AnimateWorkerMovement(this, path[i], tileHopTime));
         }
+        if (forcedMovement) movementTasks.Add(new ActionTask(EndForcedMovement));
+        else movementTasks.Add(new ActionTask(EndUnforcedMovement));
 
-        movementTasks.Add(new ActionTask(EndMovement));
 
         taskManager.AddTaskQueue(movementTasks);
+        path.Add(currentTile);
+        lastDirectionMoved = path[0].hex.Subtract(path[1].hex);
     }
 
     void InitiateMovement(List<Tile> path)
     {
-        movesRemaining -= (path.Count - 1);
-        AnimateMovementAlongPath(path);
-        if (path.Count > 0)
-        {
-            parentPlayer.workerMovedThisTurn = this;
-        }
+        parentPlayer.workerMovedThisTurn = this;
+        movesRemaining -= path.Count;
+        AnimateMovementAlongPath(path, false);
     }
 
     public bool TryToMove(Tile goal)
     {
         List<Tile> path = AStarSearch.ShortestPath(currentTile, goal);
-        if (CanMoveAlongPath(path)) {
+        if (CanMoveAlongPath(path) && path.Count > 0) {
             InitiateMovement(path);
             return true;
         }
@@ -110,11 +123,22 @@ public class Worker : MonoBehaviour {
 
     public bool CanMoveAlongPath(List<Tile> path)
     {
-        return ((path.Count - 1) <= movesRemaining);
+        return (path.Count <= movesRemaining);
     }
 
-    void EndMovement()
+    void EndForcedMovement()
     {
+        EndMovement(true);
+    }
+
+    void EndUnforcedMovement()
+    {
+        EndMovement(false);
+    }
+
+    void EndMovement(bool forcedMovement)
+    {
+        midAnimation = false;
         if (currentTile.containedResource != null && resourcesInHand < carryingCapacity)
         {
             GetResources(currentTile.containedResource.GetClaimed(
@@ -129,8 +153,7 @@ public class Worker : MonoBehaviour {
             ClaimBuilding(currentTile.containedBuilding);
         }
         Services.main.selector.ShowAppropriateTooltip();
-
-        if (!AnyAvailableActions()) Services.main.EndTurn();
+        if (!AnyAvailableActions() && !forcedMovement) Services.main.EndTurn();
     }
 
     public void EndTurn()
@@ -168,7 +191,8 @@ public class Worker : MonoBehaviour {
     public void ShowToolTip()
     {
         string tooltipText = "Moves: " + movesRemaining + "/" + maxMovementPerTurn + "\n" +
-            "Resources: " + resourcesInHand + "/" + carryingCapacity;
+            "Resources: " + resourcesInHand + "/" + carryingCapacity + "\n" +
+            "Bump Power: " + bumpPower;
 
         if (bonuses.Count > 0)
         {
@@ -197,11 +221,46 @@ public class Worker : MonoBehaviour {
         Services.main.HideWorkerTooltip();
     }
 
+    void BumpWorker(Worker otherWorker, Hex direction)
+    {
+        Hex target = otherWorker.currentTile.hex;
+        Hex tempTarget;
+        Tile targetTile = null;
+        for (int i = 1; i < bumpPower + 1; i++)
+        {
+            tempTarget = otherWorker.currentTile.hex.Add(direction.Multiply(i));
+            if (Services.MapManager.map.TryGetValue(tempTarget, out targetTile))
+            {
+                if (targetTile.containedWorker != null)
+                {
+                    targetTile = Services.MapManager.map[target];
+                    break;
+                }
+                else target = tempTarget;
+            }
+            else
+            {
+                targetTile = Services.MapManager.map[target];
+                break;
+            }
+        }
+        if (target == otherWorker.currentTile.hex)
+        {
+            BumpWorker(otherWorker, direction.Multiply(-1));
+        }
+        else
+        {
+            otherWorker.AnimateMovementAlongPath(AStarSearch.ShortestPath(otherWorker.currentTile, targetTile), 
+                true);
+        }
+
+    }
+
     public void GetResources(int numResources)
     {
-        int gain = numResources + bonusResourcePerPickup;
-        if (gain > 0)
+        if (numResources > 0)
         {
+            int gain = numResources + bonusResourcePerPickup;
             resourcesInHand += gain;
             taskManager.AddTask(new ResourceAcquisitionAnimation(currentTile, gain));
         }
@@ -254,8 +313,11 @@ public class Worker : MonoBehaviour {
 
     public void ClaimBuilding(Building building)
     {
-        building.GetClaimed(parentPlayer, resourcesInHand);
-        resourcesInHand = 0;
+        if (resourcesInHand > 0)
+        {
+            building.GetClaimed(parentPlayer, resourcesInHand + bonusClaimPower);
+            resourcesInHand = 0;
+        }
     }
 
     public void AlterStat(Item.StatType statType, int amount)
@@ -273,6 +335,12 @@ public class Worker : MonoBehaviour {
                 break;
             case Item.StatType.ItemDiscount:
                 itemDiscount += amount;
+                break;
+            case Item.StatType.BonusClaimPower:
+                bonusClaimPower += amount;
+                break;
+            case Item.StatType.BumpPower:
+                bumpPower += amount;
                 break;
             default:
                 break;
@@ -306,15 +374,15 @@ public class Worker : MonoBehaviour {
 
     public void ShowPathArrow(List<Tile> path)
     {
-        if (path.Count > 1)
+        if (path.Count > 0)
         {
+            path.Add(currentTile);
             arrowHead.SetActive(true);
             Vector3[] positions = new Vector3[path.Count];
             for (int i = 0; i < path.Count; i++)
             {
                 Vector3 basePos = path[i].hex.ScreenPos();
                 positions[i] = new Vector3(basePos.x, basePos.y, -1);
-                Debug.Log(positions[i]);
             }
             lr.positionCount = positions.Length;
             lr.SetPositions(positions);

@@ -7,17 +7,11 @@ using UnityEngine;
 public class Tile
 {
     public readonly Hex hex;
-    [HideInInspector]
     public GameObject obj;
-    [HideInInspector]
     public List<Tile> neighbors;
-    [HideInInspector]
     public Worker containedWorker;
-    [HideInInspector]
     public Resource containedResource;
-    [HideInInspector]
     public Building containedBuilding;
-    [HideInInspector]
     public Item containedItem;
     public readonly Color moveAvailableColor = new Color(0.5f, 1f, 0.5f);
 
@@ -27,5 +21,45 @@ public class Tile
         obj = GameObject.Instantiate(Services.Prefabs.Tile, hex.ScreenPos(Services.MapManager.layout), Quaternion.identity,
             Services.SceneStackManager.CurrentScene.transform);
         neighbors = new List<Tile>();
+    }
+
+    public string TooltipText()
+    {
+        string toolTipText = "";
+        //if (containedWorker != null)
+        //{
+        //    toolTipText += "contains worker from player number " + containedWorker.parentPlayer.playerNum;
+        //}
+        if (containedResource != null)
+        {
+            toolTipText += "Tile Resources: " + containedResource.numResources;
+        }
+        else if (containedItem != null)
+        {
+            toolTipText += "Item - Cost : " + containedItem.cost;
+            foreach (KeyValuePair<Item.StatType, int> bonus in containedItem.statBonuses)
+            {
+                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            }
+        }
+        else if (containedBuilding != null)
+        {
+            toolTipText += "Building : \n";
+            if (containedBuilding.controller == null)
+            {
+                toolTipText += "Neutral \n";
+            }
+            else
+            {
+                toolTipText += "Controlled by " + containedBuilding.controller.name + "\n" +
+                    containedBuilding.turnsLeft + " rounds left \n";
+            }
+            toolTipText += "Bonuses to all controller's workers: ";
+            foreach (KeyValuePair<Item.StatType, int> bonus in containedBuilding.statBonuses)
+            {
+                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+            }
+        }
+        return toolTipText;
     }
 }

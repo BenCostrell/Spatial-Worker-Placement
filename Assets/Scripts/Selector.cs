@@ -96,12 +96,11 @@ public class Selector : MonoBehaviour
 
     void SelectTile()
     {
-        if (selectedWorker != null && hoveredTile.containedWorker == null)
+        if (selectedWorker != null)
         {
             selectedWorker.TryToMove(hoveredTile);
             UnselectWorker();
-            ClearPath();
-            
+            ClearPath();  
         }
         else {
             if (hoveredTile.containedWorker != null)

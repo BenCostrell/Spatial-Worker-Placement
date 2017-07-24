@@ -14,7 +14,6 @@ public static class AStarSearch
     public static List<Tile> ShortestPath(Tile start, Tile goal)
     {
         List<Tile> path = new List<Tile>();
-        if (goal.containedWorker != null) return path;
         Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
         Dictionary<Tile, float> costSoFar = new Dictionary<Tile, float>();
 
@@ -28,9 +27,9 @@ public static class AStarSearch
             Tile current = frontier.Dequeue();
             if (current == goal) break;
 
-            foreach(Tile next in current.neighbors)
+            if (current.containedWorker == null || current == start)
             {
-                if (next.containedWorker == null)
+                foreach (Tile next in current.neighbors)
                 {
                     float newCost = costSoFar[current] + 1;
                     if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
@@ -50,7 +49,6 @@ public static class AStarSearch
             path.Add(pathNode);
             pathNode = cameFrom[pathNode];
         }
-        if (start != goal) path.Add(start);
 
         return path;
     }
@@ -73,14 +71,17 @@ public static class AStarSearch
             if (costSoFar[current] <= movesAvailable)
             {
                 if(current != start) availableGoals.Add(current);
-                foreach (Tile next in current.neighbors)
+                if (current.containedWorker == null || current == start)
                 {
-                    int newCost = costSoFar[current] + 1;
-                    if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
+                    foreach (Tile next in current.neighbors)
                     {
-                        costSoFar[next] = newCost;
-                        frontier.Enqueue(next);
-                        cameFrom[next] = current;
+                        int newCost = costSoFar[current] + 1;
+                        if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
+                        {
+                            costSoFar[next] = newCost;
+                            frontier.Enqueue(next);
+                            cameFrom[next] = current;
+                        }
                     }
                 }
             }

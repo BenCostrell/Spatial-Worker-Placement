@@ -120,7 +120,6 @@ public class MapManager : MonoBehaviour {
             Item item = GenerateItem(approxMinVal, approxMaxVal, tile);
             itemTiles.Add(tile);
             tile.containedItem = item;
-            Debug.Log("made item");
             return item;
         }
         Debug.Log("failed to make item");

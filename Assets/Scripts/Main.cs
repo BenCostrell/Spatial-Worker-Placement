@@ -19,6 +19,7 @@ public class Main : Scene<TransitionData> {
     public float resGainAnimOffset;
     public float resGainAnimDur;
     public float resGainAnimDist;
+    private TaskManager taskManager;
 
     // Use this for initialization
     void Start () {
@@ -27,7 +28,7 @@ public class Main : Scene<TransitionData> {
 	
 	// Update is called once per frame
 	void Update () {
-		
+        taskManager.Update();
 	}
 
     internal override void Init()
@@ -37,6 +38,7 @@ public class Main : Scene<TransitionData> {
         PlaceInitialWorkers();
         CreateSelector();
         roundNum = 0;
+        taskManager = new TaskManager();
         HideWorkerTooltip();
         SetTileTooltip(Services.MapManager.map[new Hex(0, 0, 0)]);
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
@@ -116,12 +118,20 @@ public class Main : Scene<TransitionData> {
 
     public void EndTurn()
     {
+        WaitForAnimations waitForAnimations = new WaitForAnimations();
+        waitForAnimations.Then(new ActionTask(ActuallyEndTurn));
+        taskManager.AddTask(waitForAnimations);
+    }
+
+    void ActuallyEndTurn()
+    {
         selector.Reset();
         currentActivePlayer.workerMovedThisTurn.EndTurn();
         currentActivePlayer.workerMovedThisTurn = null;
         Player nextPlayer = DetermineNextPlayer();
         if (nextPlayer == null) EndRound();
-        else {
+        else
+        {
             currentActivePlayer = nextPlayer;
             UpdateUI();
         }
@@ -172,38 +182,7 @@ public class Main : Scene<TransitionData> {
 
     public void SetTileTooltip(Tile tile)
     {
-        string toolTipText = "";
-        if (tile.containedResource != null)
-        {
-            toolTipText = "Tile Resources: " + tile.containedResource.numResources;
-        }
-        else if (tile.containedItem != null)
-        {
-            toolTipText = "Item - Cost : " + tile.containedItem.cost;
-            foreach(KeyValuePair<Item.StatType, int> bonus in tile.containedItem.statBonuses)
-            {
-                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
-            }
-        }
-        else if (tile.containedBuilding != null) {
-            toolTipText = "Building : \n";
-            if (tile.containedBuilding.controller == null)
-            {
-                toolTipText += "Neutral \n";
-            }
-            else
-            {
-                toolTipText += "Controlled by " + tile.containedBuilding.controller.name + "\n" +
-                    tile.containedBuilding.turnsLeft + " rounds left \n";
-            }
-            toolTipText += "Bonuses to all controller's workers: ";
-            foreach (KeyValuePair<Item.StatType, int> bonus in tile.containedBuilding.statBonuses)
-            {
-                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
-            }
-        }
-
-        tileTooltip.GetComponent<Text>().text = toolTipText;
+        tileTooltip.GetComponent<Text>().text = tile.TooltipText();
     }
 
     void OnButtonPressed(ButtonPressed e)
