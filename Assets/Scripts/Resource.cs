@@ -37,12 +37,22 @@ public class Resource : MonoBehaviour {
     public int GetClaimed(int claimAmount)
     {
         int yield = Mathf.Min(claimAmount, numResources);
-        numResources -= yield;
+        if (yield > 0)
+        {
+            numResources -= yield;
+            if (numResources == 0) DestroyThis();
+        }
         return yield;
     }
 
     public void Increment()
     {
         numResources += 1;
+    }
+
+    void DestroyThis()
+    {
+        Destroy(gameObject);
+        Services.MapManager.resourceTiles.Remove(tile);
     }
 }

@@ -200,8 +200,11 @@ public class Worker : MonoBehaviour {
     public void GetResources(int numResources)
     {
         int gain = numResources + bonusResourcePerPickup;
-        resourcesInHand += gain;
-        taskManager.AddTask(new ResourceAcquisitionAnimation(currentTile, gain));
+        if (gain > 0)
+        {
+            resourcesInHand += gain;
+            taskManager.AddTask(new ResourceAcquisitionAnimation(currentTile, gain));
+        }
     }
 
     int AdjustedItemCost(Item item)

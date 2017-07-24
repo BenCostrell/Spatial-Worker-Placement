@@ -27,7 +27,16 @@ public class MapManager : MonoBehaviour {
     public List<Tile> itemTiles;
     [HideInInspector]
     public List<Tile> buildingTiles;
-    private List<Tile> occupiedTiles;
+    private List<Tile> occupiedTiles
+    {
+        get {
+            List<Tile> occTiles = new List<Tile>();
+            if (buildingTiles != null) occTiles.AddRange(buildingTiles);
+            if (resourceTiles != null) occTiles.AddRange(resourceTiles);
+            if (itemTiles != null) occTiles.AddRange(itemTiles);
+            return occTiles;
+        }
+    }
     [HideInInspector]
     public readonly Layout layout = new Layout(Orientation.pointy, new Vector2(1, 0.6f), Vector2.zero);
     [HideInInspector]
@@ -49,7 +58,6 @@ public class MapManager : MonoBehaviour {
     {
         map = new Dictionary<Hex, Tile>();
         keys = new List<Hex>();
-        occupiedTiles = new List<Tile>();
         for (int q = -radius; q <= radius; q++)
         {
             int r1 = Mathf.Max(-radius, -q - radius);
@@ -89,13 +97,8 @@ public class MapManager : MonoBehaviour {
         int numResourceTiles = Random.Range(resourceTilesMin, resourceTilesMax + 1);
         for (int i = 0; i < numResourceTiles; i++)
         {
-            Tile resourceTile = GenerateResourceTile();
-            if (resourceTile != null)
-            {
-                resourceTiles.Add(resourceTile);
-                occupiedTiles.Add(resourceTile);
-            }
-            else break;
+            Tile resourceTile = GenerateResourceTile(resourceAmtMin, resourceAmtMax);
+            if (resourceTile == null) break;
         }
     }
 
@@ -116,7 +119,6 @@ public class MapManager : MonoBehaviour {
         {
             Item item = GenerateItem(approxMinVal, approxMaxVal, tile);
             itemTiles.Add(tile);
-            occupiedTiles.Add(tile);
             tile.containedItem = item;
             Debug.Log("made item");
             return item;
@@ -125,16 +127,17 @@ public class MapManager : MonoBehaviour {
         return null;
     }
 
-    Tile GenerateResourceTile()
+    Tile GenerateResourceTile(int minVal, int maxVal)
     {
         Tile tile = GenerateValidTile(minRadiusResourceTiles, minDistResourceTiles);
         if (tile != null)
         {
             Resource resource = Instantiate(Services.Prefabs.Resource,
                     Services.SceneStackManager.CurrentScene.transform).GetComponent<Resource>();
-            int resourceValue = Random.Range(resourceAmtMin, resourceAmtMax + 1);
+            int resourceValue = Random.Range(minVal, maxVal + 1);
             resource.Init(resourceValue, tile);
             tile.containedResource = resource;
+            resourceTiles.Add(tile);
             return tile;
         }
         else return null;
@@ -213,11 +216,9 @@ public class MapManager : MonoBehaviour {
             Hex hexCoord = Hex.Direction(i).Multiply(radius);
             Tile tile = GenerateAndPlaceBuilding(hexCoord);
             buildingTiles.Add(tile);
-            occupiedTiles.Add(tile);
         }
         Tile centerTile = GenerateAndPlaceBuilding(new Hex(0, 0, 0));
         buildingTiles.Add(centerTile);
-        occupiedTiles.Add(centerTile);
     }
 
     Tile GenerateAndPlaceBuilding(Hex coord)
@@ -238,7 +239,16 @@ public class MapManager : MonoBehaviour {
     {
         int numNewItems = numItems - itemTiles.Count;
         Debug.Log(numNewItems);
-        if (numNewItems > 0) for (int i = 0; i < numNewItems; i++)
-                GenerateAndPlaceItem(approxMinVal, approxMaxVal, 0);
+        for (int i = 0; i < numNewItems; i++)
+            GenerateAndPlaceItem(approxMinVal, approxMaxVal, 0);
+    }
+
+    public void SpawnNewResources()
+    {
+        int numNewResources = resourceTilesMax - resourceTiles.Count;
+        for (int i = 0; i < numNewResources; i++)
+        {
+            GenerateResourceTile(0, 0);
+        }
     }
 }
