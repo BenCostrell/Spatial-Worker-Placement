@@ -32,6 +32,7 @@ public class Selector : MonoBehaviour
     {
         transform.position = tile.hex.ScreenPos();
         hoveredTile = tile;
+        ShowAppropriateTooltip();
     }
 
     void ProcessInput()
@@ -43,7 +44,6 @@ public class Selector : MonoBehaviour
         {
             MoveSelector(xInput, yInput);
             if (selectedWorker != null) HighlightPath(selectedWorker.currentTile, hoveredTile);
-            ShowAppropriateTooltip();
         }
         else inputLastFrame = -1;
     }
@@ -91,11 +91,36 @@ public class Selector : MonoBehaviour
 
     void OnButtonPressed (ButtonPressed e)
     {
-        if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "A") SelectTile();
-        if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "B" &&
-            selectedWorker != null)
+        if (e.playerNum == Services.main.currentActivePlayer.playerNum)
         {
-            UnselectWorker();
+            switch (e.button)
+            {
+                case "A":
+                    SelectTile();
+                    break;
+                case "B":
+                    if (selectedWorker != null) UnselectWorker();
+                    break;
+                case "RB":
+                    CycleToNextWorker();
+                    break;
+                default:
+                    break;
+
+            }
+        }
+    }
+
+    void CycleToNextWorker()
+    {
+        if (hoveredTile.containedWorker == null)
+            PlaceOnTile(Services.main.currentActivePlayer.workers[0].currentTile);
+        else
+        {
+            List<Worker> playerWorkers = Services.main.currentActivePlayer.workers;
+            int index = playerWorkers.IndexOf(hoveredTile.containedWorker);
+            index = (index + 1) % playerWorkers.Count;
+            PlaceOnTile(playerWorkers[index].currentTile);
         }
     }
 
@@ -123,7 +148,7 @@ public class Selector : MonoBehaviour
         }
     }
 
-    void SelectWorker(Worker worker)
+    public void SelectWorker(Worker worker)
     {
         worker.Select();
         selectedWorker = worker;

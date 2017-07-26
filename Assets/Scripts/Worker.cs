@@ -153,6 +153,7 @@ public class Worker : MonoBehaviour {
         }
         Services.main.selector.ShowAppropriateTooltip();
         if (!AnyAvailableActions() && !forcedMovement) Services.main.EndTurn();
+        if (AnyAvailableActions() && !forcedMovement) Services.main.selector.SelectWorker(this);
     }
 
     public void EndTurn()

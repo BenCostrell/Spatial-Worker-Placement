@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class InputManager
 {
-    private readonly string[] buttons = { "A", "B", "X", "Y" };
+    private readonly string[] buttons = { "A", "B", "X", "Y", "RB" };
 
     public void GetInput()
     {
