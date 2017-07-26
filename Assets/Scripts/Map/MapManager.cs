@@ -172,9 +172,9 @@ public class MapManager : MonoBehaviour {
     Item GenerateItem(int approxMinVal, int approxMaxVal, Tile tile)
     {
         int typeNumRandomizer = Random.Range(0, 100);
-        int numTypes;
-        if (typeNumRandomizer < 66) numTypes = 1;
-        else numTypes = 2;
+        int numTypes = 1;
+        //if (typeNumRandomizer < 66) numTypes = 1;
+        //else numTypes = 2;
         List<Item.StatType> statTypes = new List<Item.StatType>();
         for (int i = 0; i < numTypes; i++)
         {
@@ -237,7 +237,6 @@ public class MapManager : MonoBehaviour {
     public void SpawnNewItems(int approxMinVal, int approxMaxVal)
     {
         int numNewItems = numItems - itemTiles.Count;
-        Debug.Log(numNewItems);
         for (int i = 0; i < numNewItems; i++)
             GenerateAndPlaceItem(approxMinVal, approxMaxVal, 0);
     }

@@ -92,6 +92,11 @@ public class Selector : MonoBehaviour
     void OnButtonPressed (ButtonPressed e)
     {
         if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "A") SelectTile();
+        if (e.playerNum == Services.main.currentActivePlayer.playerNum && e.button == "B" &&
+            selectedWorker != null)
+        {
+            UnselectWorker();
+        }
     }
 
     void SelectTile()

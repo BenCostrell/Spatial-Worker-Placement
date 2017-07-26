@@ -70,7 +70,6 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         taskManager.Update();
-        Debug.Assert(movesRemaining < maxMovementPerTurn || parentPlayer.workerMovedThisTurn != this);
 	}
 
     public void PlaceOnTile(Tile tile)

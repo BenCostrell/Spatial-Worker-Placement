@@ -187,10 +187,11 @@ public class Main : Scene<TransitionData> {
 
     void OnButtonPressed(ButtonPressed e)
     {
-        if (e.playerNum == currentActivePlayer.playerNum && (currentActivePlayer.workerMovedThisTurn != null) && 
-            e.button == "B")
-        {
-            EndTurn();
+        if (e.playerNum == currentActivePlayer.playerNum){
+            if ((currentActivePlayer.workerMovedThisTurn != null) && e.button == "Y")
+            {
+                EndTurn();
+            }
         }
     }
 
