@@ -35,4 +35,8 @@ public class PrefabDB : ScriptableObject {
     [SerializeField]
     private GameObject resourceGainText;
     public GameObject ResourceGainText { get { return resourceGainText; } }
+
+    [SerializeField]
+    private GameObject tooltip;
+    public GameObject Tooltip { get { return tooltip; } }
 }

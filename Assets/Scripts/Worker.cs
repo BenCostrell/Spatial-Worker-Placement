@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Worker : MonoBehaviour {
 
@@ -12,6 +13,8 @@ public class Worker : MonoBehaviour {
     private GameObject arrowHead;
     private List<Tile> availableGoals;
     public float tileHopTime;
+    public Vector3 tooltipOffset;
+    private GameObject tooltip;
     private TaskManager taskManager;
     private SpriteRenderer sr;
     public int startingMaxMovement;
@@ -194,31 +197,55 @@ public class Worker : MonoBehaviour {
             "Resources: " + resourcesInHand + "/" + carryingCapacity + "\n" +
             "Bump Power: " + bumpPower;
 
+        int extraLines = 0;
+
         if (bonuses.Count > 0)
         {
             tooltipText += "\nItem Bonuses:";
+            extraLines += 1;
             foreach (KeyValuePair<Item.StatType, int> bonus in bonuses)
             {
                 tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                extraLines += 1;
             }
         }
-        
+
         if (tempBonuses.Count > 0)
         {
             tooltipText += "\nBuilding Bonuses:";
+            extraLines += 1;
             foreach (KeyValuePair<Item.StatType, int> bonus in tempBonuses)
             {
                 tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                extraLines += 1;
             }
         }
-        
 
+        if (tooltip == null)
+        {
+            tooltip = Instantiate(Services.Prefabs.Tooltip, Services.main.canvas);
+        }
+        tooltip.transform.position =
+            Services.main.camera.WorldToScreenPoint(transform.position + tooltipOffset);
+        Color tooltipColor = (parentPlayer.color + Color.white) / 2;
+        tooltipColor = new Color(tooltipColor.r, tooltipColor.g, tooltipColor.b, 0.85f);
+        Image tooltipImage = tooltip.GetComponent<Image>();
+        Text tooltipTextComp = tooltip.GetComponentInChildren<Text>();
+        Vector2 imageSize = tooltipImage.rectTransform.sizeDelta;
+        Vector2 textboxSize = tooltipTextComp.rectTransform.sizeDelta;
+        tooltipImage.color = tooltipColor;
+        tooltipImage.rectTransform.sizeDelta = new Vector2(imageSize.x, 
+            imageSize.y + (20 * extraLines));
+        tooltipTextComp.text = tooltipText;
+        tooltipTextComp.rectTransform.sizeDelta = new Vector2(textboxSize.x, 
+            textboxSize.y + (20 * extraLines));
         Services.main.ShowWorkerTooltip(tooltipText);
     }
 
     public void HideTooltip()
     {
         Services.main.HideWorkerTooltip();
+        if (tooltip != null) Destroy(tooltip);
     }
 
     void BumpWorker(Worker otherWorker, Hex direction)

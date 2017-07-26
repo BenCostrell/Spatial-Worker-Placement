@@ -20,6 +20,8 @@ public class Main : Scene<TransitionData> {
     public float resGainAnimDur;
     public float resGainAnimDist;
     private TaskManager taskManager;
+    public Transform canvas;
+    public Camera camera;
 
     // Use this for initialization
     void Start () {
@@ -39,6 +41,8 @@ public class Main : Scene<TransitionData> {
         CreateSelector();
         roundNum = 0;
         taskManager = new TaskManager();
+        canvas = GetComponentInChildren<Canvas>().transform;
+        camera = GetComponentInChildren<Camera>();
         HideWorkerTooltip();
         SetTileTooltip(Services.MapManager.map[new Hex(0, 0, 0)]);
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
