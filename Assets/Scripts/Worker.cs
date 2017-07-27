@@ -14,6 +14,7 @@ public class Worker : MonoBehaviour {
     private List<Tile> availableGoals;
     public float tileHopTime;
     public Vector3 tooltipOffset;
+    public int extraTooltipHeightPerLine;
     private GameObject tooltip;
     private TaskManager taskManager;
     private SpriteRenderer sr;
@@ -221,12 +222,10 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        if (tooltip == null)
-        {
-            tooltip = Instantiate(Services.Prefabs.Tooltip, Services.main.canvas);
-        }
-        tooltip.transform.position =
-            Services.main.camera.WorldToScreenPoint(transform.position + tooltipOffset);
+        Destroy(tooltip);
+        tooltip = Instantiate(Services.Prefabs.Tooltip, Services.main.canvas);
+
+        tooltip.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
         Color tooltipColor = (parentPlayer.color + Color.white) / 2;
         tooltipColor = new Color(tooltipColor.r, tooltipColor.g, tooltipColor.b, 0.85f);
         Image tooltipImage = tooltip.GetComponent<Image>();
@@ -235,11 +234,11 @@ public class Worker : MonoBehaviour {
         Vector2 textboxSize = tooltipTextComp.rectTransform.sizeDelta;
         tooltipImage.color = tooltipColor;
         tooltipImage.rectTransform.sizeDelta = new Vector2(imageSize.x, 
-            imageSize.y + (20 * extraLines));
+            imageSize.y + (extraTooltipHeightPerLine * extraLines));
         tooltipTextComp.text = tooltipText;
         tooltipTextComp.rectTransform.sizeDelta = new Vector2(textboxSize.x, 
-            textboxSize.y + (20 * extraLines));
-        Services.main.ShowWorkerTooltip(tooltipText);
+            textboxSize.y + (extraTooltipHeightPerLine * extraLines));
+        //Services.main.ShowWorkerTooltip(tooltipText);
     }
 
     public void HideTooltip()
