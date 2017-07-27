@@ -23,7 +23,7 @@ public class Item
     }
     public static readonly Dictionary<StatType, int> costPerStat = new Dictionary<StatType, int>()
     {
-        { StatType.MovementSpeed, 5 },
+        { StatType.MovementSpeed, 6 },
         { StatType.CarryingCapacity, 2 },
         { StatType.ExtraResourcePickup, 3 },
         { StatType.ItemDiscount, 2 },

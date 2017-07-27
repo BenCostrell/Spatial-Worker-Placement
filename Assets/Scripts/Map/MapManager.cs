@@ -104,20 +104,25 @@ public class MapManager : MonoBehaviour {
 
     void GenerateStartingItems()
     {
+        Item.StatType statType;
+        List<Item.StatType> statPool = CreateStatPool(2);
         itemTiles = new List<Tile>();
         for (int i = 0; i < numItems; i++)
         {
-            Item item = GenerateAndPlaceItem(approxMinStartingItemVal, approxMaxStartingItemVal, minRadiusItems);
+            statType = statPool[Random.Range(0, statPool.Count)];
+            statPool.Remove(statType);
+            Item item = GenerateAndPlaceItem(approxMinStartingItemVal, approxMaxStartingItemVal, 
+                minRadiusItems, statType);
             if (item == null) break;
         }
     }
 
-    Item GenerateAndPlaceItem(int approxMinVal, int approxMaxVal, int minRadius)
+    Item GenerateAndPlaceItem(int approxMinVal, int approxMaxVal, int minRadius, Item.StatType statType)
     {
         Tile tile = GenerateValidTile(minRadius, minDistItems);
         if (tile != null)
         {
-            Item item = GenerateItem(approxMinVal, approxMaxVal, tile);
+            Item item = GenerateItem(approxMinVal, approxMaxVal, tile, statType);
             itemTiles.Add(tile);
             tile.containedItem = item;
             return item;
@@ -169,28 +174,16 @@ public class MapManager : MonoBehaviour {
         return true;
     }
 
-    Item GenerateItem(int approxMinVal, int approxMaxVal, Tile tile)
+    Item GenerateItem(int approxMinVal, int approxMaxVal, Tile tile, Item.StatType statType)
     {
-        int typeNumRandomizer = Random.Range(0, 100);
-        int numTypes = 1;
-        //if (typeNumRandomizer < 66) numTypes = 1;
-        //else numTypes = 2;
-        List<Item.StatType> statTypes = new List<Item.StatType>();
-        for (int i = 0; i < numTypes; i++)
-        {
-            int randomIndex = Random.Range(0, Item.statTypes.Count);
-            statTypes.Add(Item.statTypes[randomIndex]);
-        }
         Dictionary<Item.StatType, int> bonuses = new Dictionary<Item.StatType, int>();
         int targetValue = Distribution(approxMinVal, approxMaxVal, itemDistAntivariance);
         int cost = 0;
         while(cost < targetValue)
         {
-            int index = Random.Range(0, numTypes);
-            Item.StatType stat = statTypes[index];
-            if (!bonuses.ContainsKey(stat)) bonuses[stat] = 1;
-            else bonuses[stat] += 1;
-            cost += Item.costPerStat[stat];
+            if (!bonuses.ContainsKey(statType)) bonuses[statType] = 1;
+            else bonuses[statType] += 1;
+            cost += Item.costPerStat[statType];
         }
         return new Item(bonuses, tile);
     }
@@ -210,24 +203,29 @@ public class MapManager : MonoBehaviour {
     {
         buildingTiles = new List<Tile>();
         Services.main.buildings = new List<Building>();
+        Item.StatType statType;
+        List<Item.StatType> statPool = CreateStatPool(2);
         for (int i = 0; i < 6; i++)
         {
             Hex hexCoord = Hex.Direction(i).Multiply(radius);
-            Tile tile = GenerateAndPlaceBuilding(hexCoord);
+            statType = statPool[Random.Range(0, statPool.Count)];
+            statPool.Remove(statType);
+            Tile tile = GenerateAndPlaceBuilding(hexCoord, statType);
             buildingTiles.Add(tile);
         }
-        Tile centerTile = GenerateAndPlaceBuilding(new Hex(0, 0, 0));
+        statType = statPool[Random.Range(0, statPool.Count)];
+        statPool.Remove(statType);
+        Tile centerTile = GenerateAndPlaceBuilding(new Hex(0, 0, 0), statType);
         buildingTiles.Add(centerTile);
     }
 
-    Tile GenerateAndPlaceBuilding(Hex coord)
+    Tile GenerateAndPlaceBuilding(Hex coord, Item.StatType statType)
     {
         Building building = Instantiate(Services.Prefabs.Building, 
             Services.SceneStackManager.CurrentScene.transform).GetComponent<Building>();
         Tile tile = map[coord];
         Dictionary<Item.StatType, int> statBonuses = new Dictionary<Item.StatType, int>();
-        Item.StatType statType = Item.statTypes[Random.Range(0, Item.statTypes.Count)];
-        statBonuses[statType] = 1;
+        statBonuses[statType] = 6/Item.costPerStat[statType];
         building.Init(tile, statBonuses);
         tile.containedBuilding = building;
         Services.main.buildings.Add(building);
@@ -237,8 +235,18 @@ public class MapManager : MonoBehaviour {
     public void SpawnNewItems(int approxMinVal, int approxMaxVal)
     {
         int numNewItems = numItems - itemTiles.Count;
+        List<Item.StatType> statPool = CreateStatPool(2);
+        Item.StatType statType;
+        foreach(Tile tile in itemTiles)
+        {
+            statPool.Remove(tile.containedItem.statBonuses.Keys.First());
+        }
         for (int i = 0; i < numNewItems; i++)
-            GenerateAndPlaceItem(approxMinVal, approxMaxVal, 0);
+        {
+            statType = statPool[Random.Range(0, statPool.Count)];
+            statPool.Remove(statType);
+            GenerateAndPlaceItem(approxMinVal, approxMaxVal, 0, statType);
+        }
     }
 
     public void SpawnNewResources()
@@ -248,5 +256,18 @@ public class MapManager : MonoBehaviour {
         {
             GenerateResourceTile(0, 0);
         }
+    }
+
+    List<Item.StatType> CreateStatPool(int numEachStat)
+    {
+        List<Item.StatType> statPool = new List<Item.StatType>();
+        foreach(Item.StatType type in Item.statTypes)
+        {
+            for (int i = 0; i < numEachStat; i++)
+            {
+                statPool.Add(type);
+            }
+        }
+        return statPool;
     }
 }
