@@ -30,7 +30,8 @@ public class AnimateWorkerMovement : Task
     {
         timeElapsed += Time.deltaTime;
 
-        worker.transform.position = Vector2.Lerp(start.hex.ScreenPos(), goal.hex.ScreenPos(), 
+        worker.transform.position = Vector2.Lerp(start.hex.ScreenPos() + worker.offset, 
+            goal.hex.ScreenPos() + worker.offset, 
             Easing.QuadEaseOut(timeElapsed / duration));
 
         if (timeElapsed >= duration) SetStatus(TaskStatus.Success);
