@@ -19,7 +19,8 @@ public class Main : Scene<TransitionData> {
     public float resGainAnimOffset;
     public float resGainAnimDur;
     public float resGainAnimDist;
-    private TaskManager taskManager;
+    [HideInInspector]
+    public TaskManager taskManager;
     [HideInInspector]
     public Transform canvas;
     [HideInInspector]
@@ -38,11 +39,11 @@ public class Main : Scene<TransitionData> {
     internal override void Init()
     {
         InitializeMainServices();
+        taskManager = new TaskManager();
         Services.MapManager.CreateHexGrid();
         PlaceInitialWorkers();
         CreateSelector();
         roundNum = 0;
-        taskManager = new TaskManager();
         canvas = GetComponentInChildren<Canvas>().transform;
         mainCamera = GetComponentInChildren<Camera>();
         HideWorkerTooltip();

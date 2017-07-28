@@ -24,6 +24,10 @@ public class Resource : MonoBehaviour {
     private Vector3 basePosition;
     private bool goingUp;
     public Vector2 offset;
+    public float spawnGrowTime;
+    private TaskManager taskManager;
+    [HideInInspector]
+    public SpriteRenderer sr;
 
     // Use this for initialization
     public void Init(int numResources_, Tile tile_)
@@ -34,11 +38,16 @@ public class Resource : MonoBehaviour {
         tile = tile_;
         transform.position = tile.hex.ScreenPos() + offset;
         basePosition = transform.position;
+        sr = GetComponent<SpriteRenderer>();
+        sr.enabled = false;
+        taskManager = new TaskManager();
+        taskManager.AddTask(new ResourceSpawnAnimation(this));
     }
 
     // Update is called once per frame
     void Update () {
-        Float();   
+        Float();
+        taskManager.Update();
 	}
 
     void Float()

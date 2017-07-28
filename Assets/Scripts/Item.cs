@@ -4,8 +4,9 @@ using System.Collections.Generic;
 
 public class Item
 {
-    private GameObject obj;
+    public GameObject obj;
     private readonly Vector2 offset = 0.3f * Vector2.up;
+    public readonly float spawnGrowTime = 0.2f;
     private TextMesh costText;
     private Tile parentTile;
     public enum StatType { MovementSpeed, CarryingCapacity, ExtraResourcePickup, ItemDiscount, BonusClaimPower,
@@ -42,6 +43,8 @@ public class Item
         costText = obj.GetComponentInChildren<TextMesh>();
         costText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         cost = GetValue(statBonuses) + startingPriceBump;
+        obj.SetActive(false);
+        Services.main.taskManager.AddTask(new ItemSpawnAnimation(this));
     }
 
     public static int GetValue(Dictionary<StatType, int> bonuses)
