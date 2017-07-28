@@ -193,7 +193,7 @@ public class Worker : MonoBehaviour {
         if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
         else sr.color = parentPlayer.color;
         ClearAvailableMoves();
-        HideTooltip();
+        if (Services.main.selector.hoveredWorker != this) HideTooltip();
         arrowHead.SetActive(false);
     }
 

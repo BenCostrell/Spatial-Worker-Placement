@@ -8,9 +8,16 @@ public class Selector : MonoBehaviour
     private Tile hoveredTile;
     private List<Tile> tilePath;
     private int inputLastFrame;
-    public float timeToWaitBeforeRepeatingInput;
+    private float timeToWaitBeforeRepeatingInput {
+        get { return 1 / currentSpeed; }
+    }
+    public float baseSpeed;
+    public float accel;
+    public float maxSpeed;
+    private float currentSpeed;
     private float timeSinceLastUniqueInput;
-    private Worker hoveredWorker;
+    [HideInInspector]
+    public Worker hoveredWorker;
     private Worker selectedWorker;
 
     // Use this for initialization
@@ -20,6 +27,7 @@ public class Selector : MonoBehaviour
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
         tilePath = new List<Tile>();
         transform.localScale = Services.MapManager.layout.size;
+        currentSpeed = baseSpeed;
     }
 
     // Update is called once per frame
@@ -44,8 +52,14 @@ public class Selector : MonoBehaviour
         {
             MoveSelector(xInput, yInput);
             if (selectedWorker != null) HighlightPath(selectedWorker.currentTile, hoveredTile);
+            currentSpeed += accel;
+            if (currentSpeed > maxSpeed) currentSpeed = maxSpeed;
         }
-        else inputLastFrame = -1;
+        else
+        {
+            inputLastFrame = -1;
+            currentSpeed = baseSpeed;
+        }
     }
 
     void MoveSelector(float xInput, float yInput)
@@ -113,6 +127,7 @@ public class Selector : MonoBehaviour
 
     void CycleToNextWorker()
     {
+        if (selectedWorker != null) UnselectWorker();
         if (hoveredTile.containedWorker == null)
             PlaceOnTile(Services.main.currentActivePlayer.workers[0].currentTile);
         else
