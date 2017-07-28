@@ -415,7 +415,7 @@ MonoBehaviour:
   minRadiusResourceTiles: 3
   minRadiusItems: 3
   minDistItems: 2
-  numItems: 4
+  numItems: 5
   itemDistAntivariance: 3
   approxMinStartingItemVal: 2
   approxMaxStartingItemVal: 5

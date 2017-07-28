@@ -18,6 +18,7 @@ public class Worker : MonoBehaviour {
     private GameObject tooltip;
     private TaskManager taskManager;
     private SpriteRenderer sr;
+    public Vector2 offset;
     public int startingMaxMovement;
     [HideInInspector]
     public int maxMovementPerTurn;
@@ -86,7 +87,7 @@ public class Worker : MonoBehaviour {
         Worker prevWorker = tile.containedWorker;
         tile.containedWorker = this;
         if (prevWorker != null) BumpWorker(prevWorker, lastDirectionMoved);
-        transform.position = tile.hex.ScreenPos();
+        transform.position = tile.hex.ScreenPos() + offset;
     }
 
     void AnimateMovementAlongPath(List<Tile> path, bool forcedMovement)
@@ -190,7 +191,7 @@ public class Worker : MonoBehaviour {
     public void Unselect()
     {
         selected = false;
-        if (movedThisRound) sr.color = (parentPlayer.color + Color.gray) / 2;
+        if (movedThisRound) sr.color = (parentPlayer.color + Color.black) / 2;
         else sr.color = parentPlayer.color;
         ClearAvailableMoves();
         if (Services.main.selector.hoveredWorker != this) HideTooltip();

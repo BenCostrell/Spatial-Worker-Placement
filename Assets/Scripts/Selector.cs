@@ -129,7 +129,16 @@ public class Selector : MonoBehaviour
     {
         if (selectedWorker != null) UnselectWorker();
         if (hoveredTile.containedWorker == null)
-            PlaceOnTile(Services.main.currentActivePlayer.workers[0].currentTile);
+        {
+            foreach(Worker worker in Services.main.currentActivePlayer.workers)
+            {
+                if (!worker.movedThisRound)
+                {
+                    PlaceOnTile(worker.currentTile);
+                    break;
+                }
+            }
+        }
         else
         {
             List<Worker> playerWorkers = Services.main.currentActivePlayer.workers;
