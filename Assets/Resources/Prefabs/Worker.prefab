@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 051946071e27c4b47a4253f029b11019, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileHopTime: 0.1
+  tileHopTime: 0.13
   tooltipOffset: {x: 0, y: 0, z: 0}
   extraTooltipHeightPerLine: 30
   offset: {x: 0, y: 0.3}
@@ -96,6 +96,7 @@ MonoBehaviour:
   movedThisRound: 0
   selected: 0
   midAnimation: 0
+  mostRecentResourceAcquisition: 0
 --- !u!120 &120075436400527520
 LineRenderer:
   m_ObjectHideFlags: 1

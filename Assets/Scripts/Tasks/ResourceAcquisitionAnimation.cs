@@ -5,7 +5,7 @@ public class ResourceAcquisitionAnimation : Task
 { 
     private readonly float duration = Services.main.resGainAnimDur;
     private float timeElapsed;
-    private Tile tile;
+    private Worker worker;
     private int resourcesGained;
     private GameObject resourceGainTextObj;
     private TextMesh resourceGainText;
@@ -14,20 +14,19 @@ public class ResourceAcquisitionAnimation : Task
     private Vector2 initialPos;
     private Color initialColor;
 
-    public ResourceAcquisitionAnimation(Tile tile_, int resourcesGained_)
+    public ResourceAcquisitionAnimation(Worker worker_)
     {
-        tile = tile_;
-        resourcesGained = resourcesGained_;
+        worker = worker_;
     }
 
     protected override void Init()
     {
         timeElapsed = 0;
         resourceGainTextObj = GameObject.Instantiate(Services.Prefabs.ResourceGainText,
-            tile.hex.ScreenPos() + initialOffset, Quaternion.identity);
+            worker.currentTile.hex.ScreenPos() + initialOffset, Quaternion.identity);
         initialPos = resourceGainTextObj.transform.position;
         resourceGainText = resourceGainTextObj.GetComponent<TextMesh>();
-        resourceGainText.text = "+" + resourcesGained;
+        resourceGainText.text = "+" + worker.mostRecentResourceAcquisition;
         initialColor = resourceGainText.color;
     }
 

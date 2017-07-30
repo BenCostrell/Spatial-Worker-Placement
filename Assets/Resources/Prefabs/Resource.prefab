@@ -136,6 +136,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 582e5a68623421944b9845061416f9f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveCyclePeriod: 0.5
+  moveCycleDist: 0.06
+  offset: {x: 0, y: 0.2}
+  spawnGrowTime: 0.2
+  sr: {fileID: 0}
+  noiseSpeed: 0.5
+  noiseMag: 0.1
+  acquireAnimDur: 0.4
+  acquireAnimOffsetY: 1.5
 --- !u!212 &212684977519041216
 SpriteRenderer:
   m_ObjectHideFlags: 1

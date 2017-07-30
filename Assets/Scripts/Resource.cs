@@ -28,6 +28,21 @@ public class Resource : MonoBehaviour {
     private TaskManager taskManager;
     [HideInInspector]
     public SpriteRenderer sr;
+    private static int nextId_;
+    private static int nextId
+    {
+        get {
+            nextId_ += 1;
+            return nextId_;
+        }
+    }
+    private int id;
+    public float noiseSpeed;
+    public float noiseMag;
+    public float acquireAnimDur;
+    public float acquireAnimOffsetY;
+    [HideInInspector]
+    public bool animating;
 
     // Use this for initialization
     public void Init(int numResources_, Tile tile_)
@@ -42,11 +57,12 @@ public class Resource : MonoBehaviour {
         sr.enabled = false;
         taskManager = new TaskManager();
         taskManager.AddTask(new ResourceSpawnAnimation(this));
+        id = nextId;
     }
 
     // Update is called once per frame
     void Update () {
-        Float();
+        if (!animating) Float();
         taskManager.Update();
 	}
 
@@ -54,10 +70,18 @@ public class Resource : MonoBehaviour {
     {
         if (goingUp) moveCycleTimeElapsed += Time.deltaTime;
         else moveCycleTimeElapsed -= Time.deltaTime;
-
-        transform.position = Vector3.Lerp(basePosition, 
-            basePosition + moveCycleDist * Vector3.up,
+        float horizontalOffset = -noiseMag/2 + (noiseMag * 
+            Mathf.PerlinNoise(Time.time * noiseSpeed, 1000f * id));
+        float verticalOffset = /*-noiseMag / 2 + (noiseMag *
+            Mathf.PerlinNoise(Time.time * noiseSpeed, 5050f + 1000f * id));*/
+            Mathf.Lerp(0, moveCycleDist,
             Easing.QuadEaseOut(moveCycleTimeElapsed / moveCyclePeriod));
+
+        transform.position = new Vector3(
+            basePosition.x + horizontalOffset, 
+            basePosition.y + verticalOffset, 
+            transform.position.z);
+
         if (moveCycleTimeElapsed >= moveCyclePeriod && goingUp)
         {
             goingUp = false;
@@ -68,13 +92,17 @@ public class Resource : MonoBehaviour {
         }
     }
 
-    public int GetClaimed(int claimAmount)
+    public int GetClaimed(int claimAmount, Worker worker)
     {
         int yield = Mathf.Min(claimAmount, numResources);
         if (yield > 0)
         {
             numResources -= yield;
-            if (numResources == 0) DestroyThis();
+            if (numResources == 0)
+            {
+                numResources = yield; // just so the text is correct during the animation
+                GetFullyAcquired(worker);
+            }
         }
         return yield;
     }
@@ -82,6 +110,16 @@ public class Resource : MonoBehaviour {
     public void Increment()
     {
         numResources += 1;
+    }
+
+    void GetFullyAcquired(Worker worker)
+    { 
+        TaskQueue animationSequence = new TaskQueue(new List<Task>() {
+            new GetResourceAnimation(this),
+            new ActionTask(DestroyThis),
+            new ResourceAcquisitionAnimation(worker)
+            });
+        Services.main.taskManager.AddTaskQueue(animationSequence);
     }
 
     void DestroyThis()

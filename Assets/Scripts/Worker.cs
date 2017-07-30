@@ -46,6 +46,8 @@ public class Worker : MonoBehaviour {
     public Hex lastDirectionMoved;
     [HideInInspector]
     public bool midAnimation;
+    [HideInInspector]
+    public int mostRecentResourceAcquisition;
 
 
     // Use this for initialization
@@ -145,13 +147,7 @@ public class Worker : MonoBehaviour {
         midAnimation = false;
         if (currentTile.containedResource != null && resourcesInHand < carryingCapacity)
         {
-            int openRoom = carryingCapacity - resourcesInHand;
-            int resourceClaimAmount = Mathf.Max(openRoom - bonusResourcePerPickup, 1);
-            int yield = currentTile.containedResource.GetClaimed(resourceClaimAmount);
-            int resourcesGained;
-            if (yield > 0) resourcesGained = Mathf.Min(yield + bonusResourcePerPickup, openRoom);
-            else resourcesGained = 0;
-            GetResources(resourcesGained);
+            ClaimResources(currentTile.containedResource);
         }
         if (currentTile.containedItem != null && resourcesInHand >= AdjustedItemCost(currentTile.containedItem))
         {
@@ -288,12 +284,26 @@ public class Worker : MonoBehaviour {
 
     }
 
+    void ClaimResources(Resource resource)
+    {
+        int openRoom = carryingCapacity - resourcesInHand;
+        int resourceClaimAmount = Mathf.Max(openRoom - bonusResourcePerPickup, 1);
+        int resourcesAvailable = resource.numResources;
+        int yield = resource.GetClaimed(resourceClaimAmount, this);
+        int resourcesGained;
+        if (yield > 0) resourcesGained = Mathf.Min(yield + bonusResourcePerPickup, openRoom);
+        else resourcesGained = 0;
+        GetResources(resourcesGained);
+        if (resourcesAvailable != yield)
+            taskManager.AddTask(new ResourceAcquisitionAnimation(this));
+    }
+
     public void GetResources(int numResources)
     {
         if (numResources > 0)
         {
             resourcesInHand += numResources;
-            taskManager.AddTask(new ResourceAcquisitionAnimation(currentTile, numResources));
+            mostRecentResourceAcquisition = numResources;
         }
     }
 
