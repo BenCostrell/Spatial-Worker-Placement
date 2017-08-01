@@ -43,7 +43,6 @@ public class GetResourceAnimation : Task
         }
         resource.transform.position = Vector3.Lerp(startPos, targetPos,
             Easing.QuadEaseOut(timeElapsed % (duration / 2) / (duration / 2)));
-        Debug.Log(resource.transform.position.y);
 
         if (timeElapsed >= duration) SetStatus(TaskStatus.Success);
     }

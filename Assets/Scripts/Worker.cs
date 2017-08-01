@@ -166,7 +166,7 @@ public class Worker : MonoBehaviour {
     {
         Unselect();
         movedThisRound = true;
-        sr.color = (parentPlayer.color + Color.gray) / 2;
+        sr.color = (parentPlayer.color + Color.black) / 2;
     }
 
     public void Refresh()
