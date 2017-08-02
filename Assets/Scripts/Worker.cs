@@ -208,7 +208,8 @@ public class Worker : MonoBehaviour {
             extraLines += 1;
             foreach (KeyValuePair<Item.StatType, int> bonus in bonuses)
             {
-                tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                tooltipText += "\n" + Services.ItemConfig.GetItemStatConfig(bonus.Key).Label + 
+                    " +" + bonus.Value;
                 extraLines += 1;
             }
         }
@@ -219,7 +220,8 @@ public class Worker : MonoBehaviour {
             extraLines += 1;
             foreach (KeyValuePair<Item.StatType, int> bonus in tempBonuses)
             {
-                tooltipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                tooltipText += "\n" + Services.ItemConfig.GetItemStatConfig(bonus.Key).Label
+                    + " +" + bonus.Value;
                 extraLines += 1;
             }
         }

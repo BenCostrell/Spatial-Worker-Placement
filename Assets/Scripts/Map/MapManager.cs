@@ -183,7 +183,7 @@ public class MapManager : MonoBehaviour {
         {
             if (!bonuses.ContainsKey(statType)) bonuses[statType] = 1;
             else bonuses[statType] += 1;
-            cost += Item.costPerStat[statType];
+            cost += Services.ItemConfig.GetItemStatConfig(statType).Cost;
         }
         return new Item(bonuses, tile);
     }
@@ -225,7 +225,7 @@ public class MapManager : MonoBehaviour {
             Services.SceneStackManager.CurrentScene.transform).GetComponent<Building>();
         Tile tile = map[coord];
         Dictionary<Item.StatType, int> statBonuses = new Dictionary<Item.StatType, int>();
-        statBonuses[statType] = 6/Item.costPerStat[statType];
+        statBonuses[statType] = 6 / Services.ItemConfig.GetItemStatConfig(statType).Cost;
         building.Init(tile, statBonuses);
         tile.containedBuilding = building;
         Services.main.buildings.Add(building);
@@ -261,11 +261,11 @@ public class MapManager : MonoBehaviour {
     List<Item.StatType> CreateStatPool(int numEachStat)
     {
         List<Item.StatType> statPool = new List<Item.StatType>();
-        foreach(Item.StatType type in Item.statTypes)
+        foreach(ItemStatConfig itemStatConfig in Services.ItemConfig.Items)
         {
             for (int i = 0; i < numEachStat; i++)
             {
-                statPool.Add(type);
+                statPool.Add(itemStatConfig.StatType);
             }
         }
         return statPool;

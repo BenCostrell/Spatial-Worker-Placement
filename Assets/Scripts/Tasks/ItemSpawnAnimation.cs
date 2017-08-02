@@ -19,7 +19,7 @@ public class ItemSpawnAnimation : Task
         baseScale = item.obj.transform.localScale;
         item.obj.transform.localScale = Vector3.zero;
         timeElapsed = 0;
-        duration = item.spawnGrowTime;
+        duration = Services.ItemConfig.SpawnGrowTime;
         item.obj.SetActive(true);
     }
 

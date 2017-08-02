@@ -39,7 +39,8 @@ public class Tile
             toolTipText += "Item - Cost : " + containedItem.cost;
             foreach (KeyValuePair<Item.StatType, int> bonus in containedItem.statBonuses)
             {
-                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                toolTipText += "\n" + Services.ItemConfig.GetItemStatConfig(bonus.Key).Label 
+                    + " +" + bonus.Value;
             }
         }
         else if (containedBuilding != null)
@@ -57,7 +58,8 @@ public class Tile
             toolTipText += "Bonuses to all controller's workers: ";
             foreach (KeyValuePair<Item.StatType, int> bonus in containedBuilding.statBonuses)
             {
-                toolTipText += "\n" + Item.StatTypeToString(bonus.Key) + " +" + bonus.Value;
+                toolTipText += "\n" + Services.ItemConfig.GetItemStatConfig(bonus.Key).Label
+                    + " +" + bonus.Value;
             }
         }
         return toolTipText;

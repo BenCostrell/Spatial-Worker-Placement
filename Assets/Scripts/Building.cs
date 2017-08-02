@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Building : MonoBehaviour {
 
@@ -44,6 +45,9 @@ public class Building : MonoBehaviour {
         parentTile = tile;
         transform.position = tile.hex.ScreenPos() + offset;
         statBonuses = statBonuses__;
+        Item.StatType bonus = statBonuses.First().Key;
+        GetComponentsInChildren<SpriteRenderer>()[1].sprite =
+            Services.ItemConfig.GetItemStatConfig(bonus).Sprite;
     }
 
     public void GetClaimed(Player player, int claimAmount)

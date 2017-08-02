@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eb3247b4f84259489eb706fb7567fe6, type: 3}
+  m_Name: ExtraResourcePickup
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 52f5922502c2fd2408178da4f11bfa9a, type: 3}
+  cost: 3
+  statType: 2
+  label: Extra Resource Pickup
