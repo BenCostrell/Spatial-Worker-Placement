@@ -85,7 +85,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileHopTime: 0.13
   tooltipOffset: {x: 0, y: 0, z: 0}
-  extraTooltipHeightPerLine: 30
+  extraTooltipHeightPerLine: 25
   offset: {x: 0, y: 0.1}
   startingMaxMovement: 3
   maxMovementPerTurn: 0
