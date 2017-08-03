@@ -23,3 +23,6 @@ MonoBehaviour:
   resourceGainText: {fileID: 1697287032893424, guid: fc289afeee1accc49a1447cdc5b0bf6c,
     type: 2}
   tooltip: {fileID: 1749834311205460, guid: 9d454c2f3fd2a5e4b80ec8106194aa94, type: 2}
+  turnMarker: {fileID: 1927197091528820, guid: a91f877050bef544ab9d494c06dbddc0, type: 2}
+  roundMarker: {fileID: 1089553658779628, guid: 202db23a8bbb34e4eb61ee29061d4aaf,
+    type: 2}

@@ -82,7 +82,7 @@ public class Selector : MonoBehaviour
 
     public void ShowAppropriateTooltip()
     {
-        Services.main.SetTileTooltip(hoveredTile);
+        Services.UIManager.SetTileTooltip(hoveredTile);
         if (hoveredTile.containedWorker != null && selectedWorker == null)
         {
             if (hoveredWorker != hoveredTile.containedWorker)

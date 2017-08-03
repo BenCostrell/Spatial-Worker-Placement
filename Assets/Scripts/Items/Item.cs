@@ -40,14 +40,20 @@ public class Item
 
     public void GetAcquired()
     {
-        obj.SetActive(false);
-        Services.MapManager.itemTiles.Remove(parentTile);
-        parentTile.containedItem = null;
-        parentTile = null;
+        DestroyThis();
     }
 
     public void DecrementCost()
     {
-        if (cost > 1) cost -= 1;
+        cost -= 1;
+        if (cost <= 0) DestroyThis();
+    }
+
+    void DestroyThis()
+    {
+        GameObject.Destroy(obj);
+        Services.MapManager.itemTiles.Remove(parentTile);
+        parentTile.containedItem = null;
+        parentTile = null;
     }
 }

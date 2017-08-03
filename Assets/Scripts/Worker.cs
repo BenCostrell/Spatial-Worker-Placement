@@ -157,9 +157,9 @@ public class Worker : MonoBehaviour {
         {
             ClaimBuilding(currentTile.containedBuilding);
         }
-        Services.main.selector.ShowAppropriateTooltip();
+        Services.UIManager.selector.ShowAppropriateTooltip();
         if (!AnyAvailableActions() && !forcedMovement) Services.main.EndTurn();
-        if (AnyAvailableActions() && !forcedMovement) Services.main.selector.SelectWorker(this);
+        if (AnyAvailableActions() && !forcedMovement) Services.UIManager.selector.SelectWorker(this);
     }
 
     public void EndTurn()
@@ -190,7 +190,7 @@ public class Worker : MonoBehaviour {
         if (movedThisRound) sr.color = (parentPlayer.color + Color.black) / 2;
         else sr.color = parentPlayer.color;
         ClearAvailableMoves();
-        if (Services.main.selector.hoveredWorker != this) HideTooltip();
+        if (Services.UIManager.selector.hoveredWorker != this) HideTooltip();
         arrowHead.SetActive(false);
     }
 
@@ -227,7 +227,7 @@ public class Worker : MonoBehaviour {
         }
 
         Destroy(tooltip);
-        tooltip = Instantiate(Services.Prefabs.Tooltip, Services.main.canvas);
+        tooltip = Instantiate(Services.Prefabs.Tooltip, Services.UIManager.canvas);
 
         tooltip.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
         Color tooltipColor = (parentPlayer.color + Color.white) / 2;
@@ -247,7 +247,7 @@ public class Worker : MonoBehaviour {
 
     public void HideTooltip()
     {
-        Services.main.HideWorkerTooltip();
+        Services.UIManager.HideWorkerTooltip();
         if (tooltip != null) Destroy(tooltip);
     }
 

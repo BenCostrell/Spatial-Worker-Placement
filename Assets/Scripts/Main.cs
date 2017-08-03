@@ -5,14 +5,11 @@ using UnityEngine.UI;
 
 public class Main : Scene<TransitionData> {
 
+
     [HideInInspector]
-    public Selector selector;
+    public Player currentActivePlayer { get; private set; }
     [HideInInspector]
-    public Player currentActivePlayer;
-    public GameObject roundCounter;
-    public GameObject workerTooltip;
-    public GameObject tileTooltip;
-    private int roundNum;
+    public int roundNum { get; private set; }
     [HideInInspector]
     public List<Building> buildings;
     public int numBuildingClaimsToWin;
@@ -20,11 +17,9 @@ public class Main : Scene<TransitionData> {
     public float resGainAnimDur;
     public float resGainAnimDist;
     [HideInInspector]
-    public TaskManager taskManager;
+    public TaskManager taskManager { get; private set; }
     [HideInInspector]
-    public Transform canvas;
-    [HideInInspector]
-    public Camera mainCamera;
+    public Camera mainCamera { get; private set; }
 
     // Use this for initialization
     void Start () {
@@ -42,12 +37,10 @@ public class Main : Scene<TransitionData> {
         taskManager = new TaskManager();
         Services.MapManager.CreateHexGrid();
         PlaceInitialWorkers();
-        CreateSelector();
         roundNum = 0;
-        canvas = GetComponentInChildren<Canvas>().transform;
+        Services.UIManager.canvas = GetComponentInChildren<Canvas>().transform;
         mainCamera = GetComponentInChildren<Camera>();
-        HideWorkerTooltip();
-        SetTileTooltip(Services.MapManager.map[new Hex(0, 0, 0)]);
+        Services.UIManager.InitUI();
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
         StartRound();
     }
@@ -56,6 +49,7 @@ public class Main : Scene<TransitionData> {
     {
         Services.MapManager = Services.GameManager.sceneRoot.GetComponentInChildren<MapManager>();
         Services.main = this;
+        Services.UIManager = Services.GameManager.sceneRoot.GetComponentInChildren<UIManager>();
     }
 
     void PlaceInitialWorkers()
@@ -74,19 +68,14 @@ public class Main : Scene<TransitionData> {
         }
     }
 
-    void CreateSelector()
-    {
-        selector = Instantiate(Services.Prefabs.Selector, Services.SceneStackManager.CurrentScene.transform)
-            .GetComponent<Selector>();
-        selector.PlaceOnTile(Services.MapManager.map[new Hex(0, 0, 0)]);
-    }
+
 
     void StartRound()
     {
         roundNum += 1;
         currentActivePlayer = Services.GameManager.players[(roundNum - 1) % Services.GameManager.numPlayers];
         foreach (Player player in Services.GameManager.players) player.Refresh();
-        UpdateUI();
+        Services.UIManager.UpdateUI();
     }
 
     void EndRound()
@@ -109,9 +98,9 @@ public class Main : Scene<TransitionData> {
 
     void DecrementItemCosts()
     {
-        foreach (Tile tile in Services.MapManager.itemTiles)
+        for (int i = Services.MapManager.itemTiles.Count -1; i >= 0; i--)
         {
-            tile.containedItem.DecrementCost();
+            Services.MapManager.itemTiles[i].containedItem.DecrementCost();
         }
     }
 
@@ -132,7 +121,7 @@ public class Main : Scene<TransitionData> {
 
     void ActuallyEndTurn()
     {
-        selector.Reset();
+        Services.UIManager.selector.Reset();
         currentActivePlayer.workerMovedThisTurn.EndTurn();
         currentActivePlayer.workerMovedThisTurn = null;
         Player nextPlayer = DetermineNextPlayer();
@@ -140,7 +129,7 @@ public class Main : Scene<TransitionData> {
         else
         {
             currentActivePlayer = nextPlayer;
-            UpdateUI();
+            Services.UIManager.UpdateUI();
         }
     }
 
@@ -168,29 +157,7 @@ public class Main : Scene<TransitionData> {
         return nextPlayer;
     }
 
-    void UpdateUI()
-    {
-        roundCounter.GetComponent<Text>().text = "Round " + roundNum + "\n" + 
-            "Player " + currentActivePlayer.playerNum + " Turn";
-        selector.SetColor();
-    }
-
-    public void ShowWorkerTooltip(string tooltipText)
-    {
-        workerTooltip.SetActive(true);
-        
-        workerTooltip.GetComponent<Text>().text = tooltipText;
-    }
-
-    public void HideWorkerTooltip()
-    {
-        workerTooltip.SetActive(false);
-    }
-
-    public void SetTileTooltip(Tile tile)
-    {
-        tileTooltip.GetComponent<Text>().text = tile.TooltipText();
-    }
+    
 
     void OnButtonPressed(ButtonPressed e)
     {
