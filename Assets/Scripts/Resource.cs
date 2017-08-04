@@ -25,6 +25,9 @@ public class Resource : MonoBehaviour {
     private bool goingUp;
     public Vector2 offset;
     public float spawnGrowTime;
+    public float incrementAnimTime;
+    public float incrementScale;
+    public float incrementDist;
     private TaskManager taskManager;
     [HideInInspector]
     public SpriteRenderer sr;

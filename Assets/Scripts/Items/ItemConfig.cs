@@ -21,6 +21,18 @@ public class ItemConfig : ScriptableObject
     private int startingPriceBump;
     public int StartingPriceBump { get { return startingPriceBump; } }
 
+    [SerializeField]
+    private float decrementAnimTime;
+    public float DecrementAnimTime { get { return decrementAnimTime; } }
+
+    [SerializeField]
+    private float decrementScale;
+    public float DecrementScale { get { return decrementScale; } }
+
+    [SerializeField]
+    private float decrementDist;
+    public float DecrementDist { get { return decrementDist; } }
+
     public ItemStatConfig GetItemStatConfig(Item.StatType statType)
     {
         foreach(ItemStatConfig itemStatConfig in items)

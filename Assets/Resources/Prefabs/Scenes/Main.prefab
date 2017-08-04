@@ -416,6 +416,7 @@ MonoBehaviour:
   roundTracker: {fileID: 1310597043030750}
   roundTrackerSpacing: 50
   maxTurnsShown: 5
+  currTurnScaleUp: 1.2
   canvas: {fileID: 0}
 --- !u!114 &114745283773572244
 MonoBehaviour:

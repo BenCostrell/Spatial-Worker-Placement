@@ -80,28 +80,39 @@ public class Main : Scene<TransitionData> {
 
     void EndRound()
     {
+        TaskQueue roundEndTasks = new TaskQueue();
         DecrementBuildings();
-        IncrementResources();
-        DecrementItemCosts();
+        roundEndTasks
+            .Then(IncrementResources())
+            .Then(DecrementItemCosts());
         Services.MapManager.SpawnNewItems(2, 5);
         Services.MapManager.SpawnNewResources();
-        StartRound();
+        roundEndTasks.Add(new ActionTask(StartRound));
+        taskManager.AddTaskQueue(roundEndTasks);
     }
 
-    void IncrementResources()
+    TaskQueue IncrementResources()
     {
+        TaskQueue incrementEachResource = new TaskQueue();
         foreach (Tile tile in Services.MapManager.resourceTiles)
         {
-            if (tile.containedWorker == null) tile.containedResource.Increment();
+            if (tile.containedWorker == null)
+            {
+                incrementEachResource.Add(new IncrementResource(tile.containedResource));
+            }
         }
+        return incrementEachResource;
     }
 
-    void DecrementItemCosts()
+    TaskQueue DecrementItemCosts()
     {
+        TaskQueue decrementEachItem = new TaskQueue();
         for (int i = Services.MapManager.itemTiles.Count -1; i >= 0; i--)
         {
-            Services.MapManager.itemTiles[i].containedItem.DecrementCost();
+            decrementEachItem.Add(
+                new DecrementItem(Services.MapManager.itemTiles[i].containedItem));
         }
+        return decrementEachItem;
     }
 
     void DecrementBuildings()

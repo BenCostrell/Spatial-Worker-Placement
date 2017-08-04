@@ -21,3 +21,6 @@ MonoBehaviour:
   spawnGrowTime: 0.2
   offset: {x: 0, y: 0.3}
   startingPriceBump: 2
+  decrementAnimTime: 0.2
+  decrementScale: 1.25
+  decrementDist: 0.5

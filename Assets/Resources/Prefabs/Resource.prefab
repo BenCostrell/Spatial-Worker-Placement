@@ -140,6 +140,9 @@ MonoBehaviour:
   moveCycleDist: 0.06
   offset: {x: 0, y: 0.2}
   spawnGrowTime: 0.2
+  incrementAnimTime: 0.2
+  incrementScale: 1.25
+  incrementDist: 0.5
   sr: {fileID: 0}
   noiseSpeed: 0.5
   noiseMag: 0.1

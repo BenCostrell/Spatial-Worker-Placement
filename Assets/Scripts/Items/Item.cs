@@ -21,6 +21,7 @@ public class Item
             costText.text = value.ToString();
         }
     }
+    public bool destroyed;
 
     public Item(Dictionary<StatType, int> statBonuses_, Tile tile)
     {
@@ -55,5 +56,6 @@ public class Item
         Services.MapManager.itemTiles.Remove(parentTile);
         parentTile.containedItem = null;
         parentTile = null;
+        destroyed = true;
     }
 }
