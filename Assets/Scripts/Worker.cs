@@ -153,7 +153,8 @@ public class Worker : MonoBehaviour {
         {
             AcquireItem(currentTile.containedItem);
         }
-        if (currentTile.containedBuilding != null)
+        if (currentTile.containedBuilding != null && 
+            !currentTile.containedBuilding.permanentlyControlled)
         {
             ClaimBuilding(currentTile.containedBuilding);
         }

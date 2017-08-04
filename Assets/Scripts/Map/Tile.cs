@@ -52,8 +52,15 @@ public class Tile
             }
             else
             {
-                toolTipText += "Controlled by " + containedBuilding.controller.name + "\n" +
-                    containedBuilding.turnsLeft + " rounds left \n";
+                toolTipText += "Controlled by " + containedBuilding.controller.name + "\n";
+                if (containedBuilding.permanentlyControlled)
+                {
+                    toolTipText += "Permanently \n";
+                }
+                else
+                {
+                    toolTipText += containedBuilding.turnsLeft + " rounds left \n";
+                }
             }
             toolTipText += "Bonuses to all controller's workers: ";
             foreach (KeyValuePair<Item.StatType, int> bonus in containedBuilding.statBonuses)

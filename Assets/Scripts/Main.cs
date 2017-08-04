@@ -20,6 +20,7 @@ public class Main : Scene<TransitionData> {
     public TaskManager taskManager { get; private set; }
     [HideInInspector]
     public Camera mainCamera { get; private set; }
+    private bool turnEnding;
 
     // Use this for initialization
     void Start () {
@@ -119,15 +120,20 @@ public class Main : Scene<TransitionData> {
     {
         foreach(Tile tile in Services.MapManager.buildingTiles)
         {
-            tile.containedBuilding.Decrement();
+            if (!tile.containedBuilding.permanentlyControlled)
+                tile.containedBuilding.Decrement();
         }
     }
 
     public void EndTurn()
     {
-        WaitForAnimations waitForAnimations = new WaitForAnimations();
-        waitForAnimations.Then(new ActionTask(ActuallyEndTurn));
-        taskManager.AddTask(waitForAnimations);
+        if (!turnEnding)
+        {
+            WaitForAnimations waitForAnimations = new WaitForAnimations();
+            waitForAnimations.Then(new ActionTask(ActuallyEndTurn));
+            taskManager.AddTask(waitForAnimations);
+            turnEnding = true;
+        }
     }
 
     void ActuallyEndTurn()
@@ -142,6 +148,7 @@ public class Main : Scene<TransitionData> {
             currentActivePlayer = nextPlayer;
             Services.UIManager.UpdateUI();
         }
+        turnEnding = false;
     }
 
     Player DetermineNextPlayer()

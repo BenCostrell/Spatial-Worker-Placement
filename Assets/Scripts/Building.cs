@@ -9,12 +9,11 @@ public class Building : MonoBehaviour {
     public Vector2 offset;
     private SpriteRenderer sr;
     private TextMesh textMesh;
-    private Player controller_;
-    public Player controller
-    {
-        get { return controller_; }
-        private set { controller_ = value; }
-    }
+    public Player controller { get; private set; }
+    public bool permanentlyControlled { get; private set; }
+    public int permanentControlThreshold;
+    public float permanentControlScaleIncrease;
+    private List<int> playerInfluence;
     private int turnsLeft_;
     public int turnsLeft
     {
@@ -27,27 +26,25 @@ public class Building : MonoBehaviour {
         }
     }
     private Tile parentTile;
-    private Dictionary<Item.StatType, int> statBonuses_;
-    public Dictionary<Item.StatType, int> statBonuses
-    {
-        get { return statBonuses_; }
-        private set { statBonuses_ = value; }
-    }
+    public Dictionary<Item.StatType, int> statBonuses { get; private set; }
 
     // Use this for initialization
-    public void Init(Tile tile, Dictionary<Item.StatType, int> statBonuses__)
+    public void Init(Tile tile, Dictionary<Item.StatType, int> statBonuses_)
     {
         sr = GetComponent<SpriteRenderer>();
         textMesh = GetComponentInChildren<TextMesh>();
         textMesh.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         sr.color = defaultColor;
         turnsLeft = 0;
+        permanentlyControlled = false;
         parentTile = tile;
         transform.position = tile.hex.ScreenPos() + offset;
-        statBonuses = statBonuses__;
+        statBonuses = statBonuses_;
         Item.StatType bonus = statBonuses.First().Key;
         GetComponentsInChildren<SpriteRenderer>()[1].sprite =
             Services.ItemConfig.GetItemStatConfig(bonus).Sprite;
+        playerInfluence = new List<int>();
+        for (int i = 0; i < Services.GameManager.numPlayers; i++) playerInfluence.Add(0);
     }
 
     public void GetClaimed(Player player, int claimAmount)
@@ -107,7 +104,19 @@ public class Building : MonoBehaviour {
         if (turnsLeft > 0)
         {
             turnsLeft -= 1;
-            if (turnsLeft == 0) ReturnToNeutral();
+            playerInfluence[controller.playerNum - 1] += 1;
+            if (playerInfluence[controller.playerNum - 1] >= permanentControlThreshold)
+            {
+                GainPermanentControl();
+            }
+            else if (turnsLeft == 0) ReturnToNeutral();
         }
+    }
+
+    void GainPermanentControl()
+    {
+        permanentlyControlled = true;
+        turnsLeft = 0;
+        transform.localScale *= permanentControlScaleIncrease;
     }
 }
