@@ -14,6 +14,7 @@ public class Building : MonoBehaviour {
     public int permanentControlThreshold;
     public float permanentControlScaleIncrease;
     private List<int> playerInfluence;
+    private List<GameObject> influenceBars;
     private int turnsLeft_;
     public int turnsLeft
     {
@@ -44,7 +45,23 @@ public class Building : MonoBehaviour {
         GetComponentsInChildren<SpriteRenderer>()[1].sprite =
             Services.ItemConfig.GetItemStatConfig(bonus).Sprite;
         playerInfluence = new List<int>();
-        for (int i = 0; i < Services.GameManager.numPlayers; i++) playerInfluence.Add(0);
+        influenceBars = new List<GameObject>();
+        SpriteRenderer[] childSrs = GetComponentsInChildren<SpriteRenderer>();
+        foreach(SpriteRenderer csr in childSrs)
+        {
+            if (csr.tag == "InfluenceBar")
+            {
+                influenceBars.Add(csr.gameObject);
+            }
+        }
+        for (int i = 0; i < Services.GameManager.numPlayers; i++)
+        {
+            playerInfluence.Add(0);
+            Transform progressBar = influenceBars[i].transform.GetChild(0);
+            progressBar.GetComponent<SpriteRenderer>().color =
+                Services.GameManager.playerColors[i];
+            progressBar.transform.localScale = new Vector3(1, 0, 1);
+        }
     }
 
     public void GetClaimed(Player player, int claimAmount)
@@ -104,7 +121,7 @@ public class Building : MonoBehaviour {
         if (turnsLeft > 0)
         {
             turnsLeft -= 1;
-            playerInfluence[controller.playerNum - 1] += 1;
+            IncrementInfluence(controller.playerNum - 1);
             if (playerInfluence[controller.playerNum - 1] >= permanentControlThreshold)
             {
                 GainPermanentControl();
@@ -112,11 +129,22 @@ public class Building : MonoBehaviour {
             else if (turnsLeft == 0) ReturnToNeutral();
         }
     }
+    
+    void IncrementInfluence(int playerIndex)
+    {
+        playerInfluence[playerIndex] += 1;
+        influenceBars[playerIndex].transform.GetChild(0).localScale =
+            new Vector3(1, playerInfluence[playerIndex] / (float)permanentControlThreshold, 1);
+    }
 
     void GainPermanentControl()
     {
         permanentlyControlled = true;
         turnsLeft = 0;
         transform.localScale *= permanentControlScaleIncrease;
+        foreach(GameObject bar in influenceBars)
+        {
+            bar.SetActive(false);
+        }
     }
 }
