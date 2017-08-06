@@ -13,6 +13,8 @@ public class Building : MonoBehaviour {
     public bool permanentlyControlled { get; private set; }
     public int permanentControlThreshold;
     public float permanentControlScaleIncrease;
+    public float decrementAnimTime;
+    public float decrementAnimScale;
     private List<int> playerInfluence;
     private List<GameObject> influenceBars;
     private int turnsLeft_;

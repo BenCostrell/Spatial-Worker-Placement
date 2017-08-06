@@ -122,7 +122,7 @@ public class Resource : MonoBehaviour {
             new ActionTask(DestroyThis),
             new ResourceAcquisitionAnimation(worker)
             });
-        Services.main.taskManager.AddTaskQueue(animationSequence);
+        Services.main.taskManager.AddTask(animationSequence);
     }
 
     void DestroyThis()

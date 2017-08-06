@@ -20,7 +20,7 @@ public class TaskManager {
         taskTree.root.SetStatus(Task.TaskStatus.Pending);
     }
 
-    public void AddTaskQueue(TaskQueue taskQueue)
+    public void AddTask(TaskQueue taskQueue)
     {
         AddTask(taskQueue.tasks[0]);
         for (int i = 1; i < taskQueue.tasks.Count; i++)

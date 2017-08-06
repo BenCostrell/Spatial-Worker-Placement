@@ -105,7 +105,7 @@ public class Worker : MonoBehaviour {
         else movementTasks.Add(new ActionTask(EndUnforcedMovement));
 
 
-        taskManager.AddTaskQueue(movementTasks);
+        taskManager.AddTask(movementTasks);
         path.Add(currentTile);
         lastDirectionMoved = path[0].hex.Subtract(path[1].hex);
     }

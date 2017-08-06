@@ -175,12 +175,63 @@ public class TaskTree
         foreach (TaskTree child in _children) children.Add(child);
     }
 
+    public TaskTree AddChild(Task child)
+    {
+        return AddChild(new TaskTree(child));
+    }
+
+    public TaskTree AddChild(TaskTree child)
+    {
+        children.Add(child);
+        return this;
+    }
+
+    public TaskTree AddChildren(List<TaskTree> children_)
+    {
+        children.AddRange(children_);
+        return this;
+    }
+
+    public TaskTree AddChildren(List<Task> children_)
+    {
+        for (int i = 0; i < children_.Count; i++)
+        {
+            children.Add(new TaskTree(children_[i]));
+        }
+        return this;
+    }
+
     public Task DistributedTree()
     {
         List<Task> childrenDistributed = new List<Task>();
         if (children.Count > 0) foreach (TaskTree child in children) childrenDistributed.Add(child.DistributedTree());
         root.Then(childrenDistributed);
         return root;
+    }
+
+    public TaskTree Then(TaskTree nextTree)
+    {
+        if (children.Count > 0)
+        {
+            return children[0].Then(nextTree);
+        }
+        else
+        {
+            return AddChild(nextTree);
+        }
+    }
+
+    public TaskTree Then(Task nextTask)
+    {
+        return Then(new TaskTree(nextTask));
+    }
+}
+
+public class EmptyTask : Task
+{
+    protected override void Init()
+    {
+        SetStatus(TaskStatus.Success);
     }
 }
 

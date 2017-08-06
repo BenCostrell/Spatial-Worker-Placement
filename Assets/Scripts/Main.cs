@@ -81,48 +81,58 @@ public class Main : Scene<TransitionData> {
 
     void EndRound()
     {
-        TaskQueue roundEndTasks = new TaskQueue();
-        DecrementBuildings();
+        TaskTree roundEndTasks = new TaskTree(new EmptyTask());
         roundEndTasks
+            .Then(DecrementBuildings())
             .Then(IncrementResources())
-            .Then(DecrementItemCosts());
-        Services.MapManager.SpawnNewItems(2, 5);
-        Services.MapManager.SpawnNewResources();
-        roundEndTasks.Add(new ActionTask(StartRound));
-        taskManager.AddTaskQueue(roundEndTasks);
+            .Then(DecrementItemCosts())
+            .Then(new ActionTask(TempSpawnNewItems))
+            .Then(new ActionTask(Services.MapManager.SpawnNewResources))
+            .Then(new ActionTask(StartRound));
+        taskManager.AddTask(roundEndTasks);
     }
 
-    TaskQueue IncrementResources()
+    void TempSpawnNewItems()
     {
-        TaskQueue incrementEachResource = new TaskQueue();
+        Services.MapManager.SpawnNewItems(2, 5);
+    }
+
+    TaskTree IncrementResources()
+    {
+        TaskTree incrementEachResource = new TaskTree(new EmptyTask());
         foreach (Tile tile in Services.MapManager.resourceTiles)
         {
             if (tile.containedWorker == null)
             {
-                incrementEachResource.Add(new IncrementResource(tile.containedResource));
+                incrementEachResource.AddChild(new IncrementResource(tile.containedResource));
             }
         }
         return incrementEachResource;
     }
 
-    TaskQueue DecrementItemCosts()
+    TaskTree DecrementItemCosts()
     {
-        TaskQueue decrementEachItem = new TaskQueue();
+        TaskTree decrementEachItem = new TaskTree(new EmptyTask());
         for (int i = Services.MapManager.itemTiles.Count -1; i >= 0; i--)
         {
-            decrementEachItem.Add(
+            decrementEachItem.AddChild(
                 new DecrementItem(Services.MapManager.itemTiles[i].containedItem));
         }
         return decrementEachItem;
     }
 
-    void DecrementBuildings()
+    TaskTree DecrementBuildings()
     {
-        foreach(Tile tile in Services.MapManager.buildingTiles)
+        TaskTree decrementEachBuilding = new TaskTree(new EmptyTask());
+        foreach (Tile tile in Services.MapManager.buildingTiles)
         {
-            if (!tile.containedBuilding.permanentlyControlled)
-                tile.containedBuilding.Decrement();
+            if (!tile.containedBuilding.permanentlyControlled && 
+                tile.containedBuilding.turnsLeft > 0)
+            {
+                decrementEachBuilding.AddChild(new DecrementBuilding(tile.containedBuilding));
+            }
         }
+        return decrementEachBuilding;
     }
 
     public void EndTurn()
