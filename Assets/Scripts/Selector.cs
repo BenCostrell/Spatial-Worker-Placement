@@ -19,6 +19,7 @@ public class Selector : MonoBehaviour
     [HideInInspector]
     public Worker hoveredWorker;
     private Worker selectedWorker;
+    private Tile lastHoveredTile;
 
     // Use this for initialization
     void Start()
@@ -41,6 +42,9 @@ public class Selector : MonoBehaviour
         transform.position = tile.hex.ScreenPos();
         hoveredTile = tile;
         ShowAppropriateTooltip();
+        HideLastHoveredInfo();
+        ShowOnHoverInfo();
+        lastHoveredTile = tile;
     }
 
     void ProcessInput()
@@ -100,6 +104,42 @@ public class Selector : MonoBehaviour
         if (selectedWorker != null)
         {
             selectedWorker.ShowToolTip();
+        }
+    }
+
+    void ShowOnHoverInfo()
+    {
+        if (selectedWorker != null)
+        {
+            if (hoveredTile.containedBuilding != null)
+            {
+                hoveredTile.containedBuilding.ShowPotentialClaim(selectedWorker);
+            }
+            else if (hoveredTile.containedItem != null)
+            {
+                hoveredTile.containedItem.ShowPotentialPurchasePrice(selectedWorker);
+            }
+        }
+    }
+
+    void HideLastHoveredInfo()
+    {
+        if (lastHoveredTile != null)
+        {
+            if (lastHoveredTile.containedBuilding != null)
+            {
+                if (lastHoveredTile.containedBuilding.hoverInfoActive)
+                {
+                    lastHoveredTile.containedBuilding.ResetDisplay();
+                }
+            }
+            else if (lastHoveredTile.containedItem != null)
+            {
+                if (lastHoveredTile.containedItem.hoverInfoActive)
+                {
+                    lastHoveredTile.containedItem.ResetDisplay();
+                }
+            }
         }
     }
 
@@ -182,6 +222,7 @@ public class Selector : MonoBehaviour
     {
         selectedWorker.Unselect();
         selectedWorker = null;
+        HideLastHoveredInfo();
     }
 
     void HighlightPath(Tile start, Tile goal)

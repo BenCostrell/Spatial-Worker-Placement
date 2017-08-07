@@ -9,6 +9,7 @@ public class Building : MonoBehaviour {
     public Vector2 offset;
     private SpriteRenderer sr;
     private TextMesh textMesh;
+    private Color defaultTextColor;
     public Player controller { get; private set; }
     public bool permanentlyControlled { get; private set; }
     public int permanentControlThreshold;
@@ -30,6 +31,7 @@ public class Building : MonoBehaviour {
     }
     private Tile parentTile;
     public Dictionary<Item.StatType, int> statBonuses { get; private set; }
+    public bool hoverInfoActive { get; private set; }
 
     // Use this for initialization
     public void Init(Tile tile, Dictionary<Item.StatType, int> statBonuses_)
@@ -37,6 +39,7 @@ public class Building : MonoBehaviour {
         sr = GetComponent<SpriteRenderer>();
         textMesh = GetComponentInChildren<TextMesh>();
         textMesh.gameObject.GetComponent<Renderer>().sortingOrder = 4;
+        defaultTextColor = textMesh.color;
         sr.color = defaultColor;
         turnsLeft = 0;
         permanentlyControlled = false;
@@ -148,5 +151,61 @@ public class Building : MonoBehaviour {
         {
             bar.SetActive(false);
         }
+    }
+
+    public void ShowPotentialClaim(Worker worker)
+    {
+        hoverInfoActive = true;
+        int claimAmount = worker.resourcesInHand + worker.bonusClaimPower;
+        textMesh.color = Color.cyan;
+        int newPotentialTurnsLeftCounter;
+        if (controller == null && claimAmount > 0)
+        {
+            newPotentialTurnsLeftCounter = claimAmount;
+            sr.color = worker.parentPlayer.color;
+        }
+        else if (controller == worker.parentPlayer)
+        {
+            newPotentialTurnsLeftCounter = turnsLeft + claimAmount;
+        }
+        else if (claimAmount > turnsLeft)
+        {
+            newPotentialTurnsLeftCounter = claimAmount - turnsLeft;
+            sr.color = worker.parentPlayer.color;
+        }
+        else if (claimAmount < turnsLeft)
+        {
+            newPotentialTurnsLeftCounter = turnsLeft - claimAmount;
+        }
+        else
+        {
+            newPotentialTurnsLeftCounter = 0;
+            sr.color = Color.white;
+        }
+
+        if (newPotentialTurnsLeftCounter != 0)
+        {
+            textMesh.text = newPotentialTurnsLeftCounter.ToString();
+        }
+        else
+        {
+            textMesh.text = "";
+        }
+    }
+
+    public void ResetDisplay()
+    {
+        hoverInfoActive = false;
+        if (turnsLeft != 0)
+        {
+            textMesh.text = turnsLeft.ToString();
+        }
+        else
+        {
+            textMesh.text = "";
+        }
+        textMesh.color = defaultTextColor;
+        if (controller == null) sr.color = Color.white;
+        else sr.color = controller.color;
     }
 }

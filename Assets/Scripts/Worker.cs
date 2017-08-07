@@ -42,8 +42,8 @@ public class Worker : MonoBehaviour {
         }
     }
     private int bonusResourcePerPickup;
-    private int itemDiscount;
-    private int bonusClaimPower;
+    public int itemDiscount { get; private set; }
+    public int bonusClaimPower { get; private set; }
     public int defaultBumpPower;
     private int bumpPower;
     private List<Item> items;

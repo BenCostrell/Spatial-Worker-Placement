@@ -5,8 +5,9 @@ using System.Linq;
 
 public class Item
 {
-    public GameObject obj;
+    public GameObject obj { get; private set; }
     private TextMesh costText;
+    private Color defaultTextColor;
     private Tile parentTile;
     public enum StatType { MovementSpeed, CarryingCapacity, ExtraResourcePickup, ItemDiscount, BonusClaimPower,
         BumpPower }
@@ -21,7 +22,8 @@ public class Item
             costText.text = value.ToString();
         }
     }
-    public bool destroyed;
+    public bool destroyed { get; private set; }
+    public bool hoverInfoActive { get; private set; }
 
     public Item(Dictionary<StatType, int> statBonuses_, Tile tile)
     {
@@ -31,6 +33,7 @@ public class Item
         parentTile = tile;
         costText = obj.GetComponentInChildren<TextMesh>();
         costText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
+        defaultTextColor = costText.color;
         cost = Services.ItemConfig.GetValue(statBonuses) 
             + Services.ItemConfig.StartingPriceBump;
         obj.SetActive(false);
@@ -57,5 +60,19 @@ public class Item
         parentTile.containedItem = null;
         parentTile = null;
         destroyed = true;
+    }
+
+    public void ShowPotentialPurchasePrice(Worker worker)
+    {
+        costText.text = Mathf.Max(1, cost - worker.itemDiscount).ToString();
+        costText.color = Color.cyan;
+        hoverInfoActive = true;
+    }
+
+    public void ResetDisplay()
+    {
+        costText.text = cost.ToString();
+        costText.color = defaultTextColor;
+        hoverInfoActive = false;
     }
 }
