@@ -70,7 +70,7 @@ public class Worker : MonoBehaviour {
         sr = GetComponent<SpriteRenderer>();
         lr = GetComponentInChildren<LineRenderer>();
         resourceHudText = GetComponentInChildren<TextMesh>();
-        resourceHudText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
+        resourceHudText.gameObject.GetComponent<Renderer>().sortingOrder = 7;
         arrowHead = lr.gameObject;
         arrowHead.SetActive(false);
         sr.color = parentPlayer.color;
