@@ -261,7 +261,6 @@ public class Worker : MonoBehaviour {
 
     public void HideTooltip()
     {
-        Services.UIManager.HideWorkerTooltip();
         if (tooltip != null) Destroy(tooltip);
     }
 

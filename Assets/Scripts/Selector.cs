@@ -86,7 +86,6 @@ public class Selector : MonoBehaviour
 
     public void ShowAppropriateTooltip()
     {
-        Services.UIManager.SetTileTooltip(hoveredTile);
         if (hoveredTile.containedWorker != null && selectedWorker == null)
         {
             if (hoveredWorker != hoveredTile.containedWorker)
@@ -111,14 +110,27 @@ public class Selector : MonoBehaviour
     {
         if (selectedWorker != null)
         {
-            if (hoveredTile.containedBuilding != null)
+            if (hoveredTile.containedBuilding != null && 
+                !hoveredTile.containedBuilding.hoverInfoActive)
             {
                 hoveredTile.containedBuilding.ShowPotentialClaim(selectedWorker);
             }
-            else if (hoveredTile.containedItem != null)
+            else if (hoveredTile.containedItem != null &&
+                !hoveredTile.containedItem.hoverInfoActive)
             {
                 hoveredTile.containedItem.ShowPotentialPurchasePrice(selectedWorker);
             }
+        }
+
+        if (hoveredTile.containedItem != null 
+            && !hoveredTile.containedItem.tooltipActive)
+        {
+            hoveredTile.containedItem.ShowTooltip();
+        }
+        if (hoveredTile.containedBuilding != null 
+            && !hoveredTile.containedBuilding.tooltipActive)
+        {
+            hoveredTile.containedBuilding.ShowTooltip();
         }
     }
 
@@ -132,12 +144,20 @@ public class Selector : MonoBehaviour
                 {
                     lastHoveredTile.containedBuilding.ResetDisplay();
                 }
+                if (lastHoveredTile.containedBuilding.tooltipActive)
+                {
+                    lastHoveredTile.containedBuilding.HideTooltip();
+                }
             }
             else if (lastHoveredTile.containedItem != null)
             {
                 if (lastHoveredTile.containedItem.hoverInfoActive)
                 {
                     lastHoveredTile.containedItem.ResetDisplay();
+                }
+                if (lastHoveredTile.containedItem.tooltipActive)
+                {
+                    lastHoveredTile.containedItem.HideTooltip();
                 }
             }
         }

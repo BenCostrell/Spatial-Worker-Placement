@@ -33,6 +33,14 @@ public class ItemConfig : ScriptableObject
     private float decrementDist;
     public float DecrementDist { get { return decrementDist; } }
 
+    [SerializeField]
+    private Vector3 tooltipOffset;
+    public Vector3 TooltipOffset { get { return tooltipOffset; } }
+
+    [SerializeField]
+    private Color tooltipColor;
+    public Color TooltipColor { get { return tooltipColor; } }
+
     public ItemStatConfig GetItemStatConfig(Item.StatType statType)
     {
         foreach(ItemStatConfig itemStatConfig in items)

@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
     public GameObject roundCounter;
-    public GameObject workerTooltip;
-    public GameObject tileTooltip;
     public GameObject roundTracker;
     public float roundTrackerSpacing;
     public int maxTurnsShown;
@@ -21,8 +19,6 @@ public class UIManager : MonoBehaviour {
     public void InitUI()
     {
         CreateSelector();
-        HideWorkerTooltip();
-        SetTileTooltip(Services.MapManager.map[new Hex(0, 0, 0)]);
         trackerCurrentTurnNum = -1;
     }
 
@@ -33,23 +29,6 @@ public class UIManager : MonoBehaviour {
         selector.SetColor();
         trackerCurrentTurnNum += 1;
         SetRoundTracker();
-    }
-
-    public void ShowWorkerTooltip(string tooltipText)
-    {
-        workerTooltip.SetActive(true);
-
-        workerTooltip.GetComponent<Text>().text = tooltipText;
-    }
-
-    public void HideWorkerTooltip()
-    {
-        workerTooltip.SetActive(false);
-    }
-
-    public void SetTileTooltip(Tile tile)
-    {
-        tileTooltip.GetComponent<Text>().text = tile.TooltipText();
     }
 
     void CreateSelector()

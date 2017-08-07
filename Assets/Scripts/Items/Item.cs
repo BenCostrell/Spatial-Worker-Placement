@@ -2,10 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UI;
 
 public class Item
 {
     public GameObject obj { get; private set; }
+    private GameObject tooltip;
+    public bool tooltipActive { get; private set; }
     private TextMesh costText;
     private Color defaultTextColor;
     private Tile parentTile;
@@ -74,5 +77,35 @@ public class Item
         costText.text = cost.ToString();
         costText.color = defaultTextColor;
         hoverInfoActive = false;
+    }
+
+    public void ShowTooltip()
+    {
+        tooltipActive = true;
+        tooltip = GameObject.Instantiate(Services.Prefabs.ItemTooltip, 
+            Services.UIManager.canvas);
+        RectTransform tooltipRect = tooltip.GetComponent<RectTransform>();
+        Vector3 offset = Services.ItemConfig.TooltipOffset;
+        if (obj.transform.position.x > 0)
+        {
+            offset = new Vector3(-offset.x, offset.y, offset.z);
+        }
+        tooltipRect.anchoredPosition = 
+            Services.main.mainCamera.WorldToScreenPoint( 
+                obj.transform.position + offset);
+        string tooltipText = "";
+        foreach (KeyValuePair<Item.StatType, int> bonus in statBonuses)
+        {
+            tooltipText += Services.ItemConfig.GetItemStatConfig(bonus.Key).Label
+                + "\n +" + bonus.Value + "\n";
+        }
+        tooltip.GetComponentInChildren<Text>().text = tooltipText;
+        tooltip.GetComponentInChildren<Image>().color = Services.ItemConfig.TooltipColor;
+    }
+
+    public void HideTooltip()
+    {
+        tooltipActive = false;
+        GameObject.Destroy(tooltip);
     }
 }

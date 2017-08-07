@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
 public class Building : MonoBehaviour {
 
     public Color defaultColor;
     public Vector2 offset;
+    private GameObject tooltip;
+    public Color tooltipColor;
     private SpriteRenderer sr;
     private TextMesh textMesh;
     private Color defaultTextColor;
@@ -32,6 +35,7 @@ public class Building : MonoBehaviour {
     private Tile parentTile;
     public Dictionary<Item.StatType, int> statBonuses { get; private set; }
     public bool hoverInfoActive { get; private set; }
+    public bool tooltipActive { get; private set; }
 
     // Use this for initialization
     public void Init(Tile tile, Dictionary<Item.StatType, int> statBonuses_)
@@ -207,5 +211,34 @@ public class Building : MonoBehaviour {
         textMesh.color = defaultTextColor;
         if (controller == null) sr.color = Color.white;
         else sr.color = controller.color;
+    }
+
+    public void ShowTooltip()
+    {
+        tooltipActive = true;
+        tooltip = GameObject.Instantiate(Services.Prefabs.BuildingTooltip,
+            Services.UIManager.canvas);
+        RectTransform tooltipRect = tooltip.GetComponent<RectTransform>();
+        Vector3 offset = Services.ItemConfig.TooltipOffset;
+        if (transform.position.x > 0)
+        {
+            offset = new Vector3(-offset.x, offset.y, offset.z);
+        }
+        tooltipRect.anchoredPosition =
+            Services.main.mainCamera.WorldToScreenPoint(transform.position + offset);
+        string tooltipText = "Bonus to each of controller's units:\n";
+        foreach (KeyValuePair<Item.StatType, int> bonus in statBonuses)
+        {
+            tooltipText += Services.ItemConfig.GetItemStatConfig(bonus.Key).Label
+                + "\n +" + bonus.Value + "\n";
+        }
+        tooltip.GetComponentInChildren<Text>().text = tooltipText;
+        tooltip.GetComponentInChildren<Image>().color = tooltipColor;
+    }
+
+    public void HideTooltip()
+    {
+        tooltipActive = false;
+        GameObject.Destroy(tooltip);
     }
 }
