@@ -5,12 +5,11 @@ using UnityEngine.UI;
 
 public class Worker : MonoBehaviour {
 
-    [HideInInspector]
-    public Player parentPlayer;
-    [HideInInspector]
-    public Tile currentTile;
+    public Player parentPlayer { get; private set; }
+    public Tile currentTile { get; private set; }
     private LineRenderer lr;
     private GameObject arrowHead;
+    private TextMesh resourceHudText;
     private List<Tile> availableGoals;
     public float tileHopTime;
     public Vector3 tooltipOffset;
@@ -20,18 +19,32 @@ public class Worker : MonoBehaviour {
     private SpriteRenderer sr;
     public Vector2 offset;
     public int startingMaxMovement;
-    [HideInInspector]
-    public int maxMovementPerTurn;
-    [HideInInspector]
-    public int movesRemaining;
+    public int maxMovementPerTurn { get; private set; }
+    public int movesRemaining { get; private set; }
     public int startingCarryingCapacity;
-    [HideInInspector]
-    public int carryingCapacity;
-    [HideInInspector]
-    public int resourcesInHand;
+    private int carryingCapacity_;
+    public int carryingCapacity {
+        get { return carryingCapacity_; }
+        private set
+        {
+            carryingCapacity_ = value;
+            resourceHudText.text = resourcesInHand_ + "/" + carryingCapacity_;
+        }
+    }
+    private int resourcesInHand_;
+    public int resourcesInHand
+    {
+        get { return resourcesInHand_; }
+        private set
+        {
+            resourcesInHand_ = value;
+            resourceHudText.text = resourcesInHand_ + "/" + carryingCapacity_;
+        }
+    }
     private int bonusResourcePerPickup;
     private int itemDiscount;
     private int bonusClaimPower;
+    public int defaultBumpPower;
     private int bumpPower;
     private List<Item> items;
     private Dictionary<Item.StatType, int> bonuses;
@@ -56,6 +69,8 @@ public class Worker : MonoBehaviour {
         taskManager = new TaskManager();
         sr = GetComponent<SpriteRenderer>();
         lr = GetComponentInChildren<LineRenderer>();
+        resourceHudText = GetComponentInChildren<TextMesh>();
+        resourceHudText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         arrowHead = lr.gameObject;
         arrowHead.SetActive(false);
         sr.color = parentPlayer.color;
@@ -66,7 +81,7 @@ public class Worker : MonoBehaviour {
         bonusResourcePerPickup = 0;
         itemDiscount = 0;
         bonusClaimPower = 0;
-        bumpPower = 1;
+        bumpPower = defaultBumpPower;
         items = new List<Item>();
         availableGoals = new List<Tile>();
         bonuses = new Dictionary<Item.StatType, int>();
@@ -197,9 +212,7 @@ public class Worker : MonoBehaviour {
 
     public void ShowToolTip()
     {
-        string tooltipText = "Moves: " + movesRemaining + "/" + maxMovementPerTurn + "\n" +
-            "Resources: " + resourcesInHand + "/" + carryingCapacity + "\n" +
-            "Bump Power: " + bumpPower;
+        string tooltipText = "Moves: " + movesRemaining + "/" + maxMovementPerTurn;
 
         int extraLines = 0;
 

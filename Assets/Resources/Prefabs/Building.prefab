@@ -286,10 +286,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39df550348bce6642837bb0967fdc025, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultColor: {r: 0.75735295, g: 0.75735295, b: 0.75735295, a: 1}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
   offset: {x: 0, y: 0.6}
   permanentControlThreshold: 6
   permanentControlScaleIncrease: 1.2
+  decrementAnimTime: 0.5
+  decrementAnimScale: 1.3
 --- !u!212 &212049364818004700
 SpriteRenderer:
   m_ObjectHideFlags: 1
