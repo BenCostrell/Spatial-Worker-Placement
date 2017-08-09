@@ -21,12 +21,16 @@ public class MapManager : MonoBehaviour {
     public int approxMinStartingItemVal;
     public int approxMaxStartingItemVal;
 
-    [HideInInspector]
-    public List<Tile> resourceTiles;
-    [HideInInspector]
-    public List<Tile> itemTiles;
-    [HideInInspector]
-    public List<Tile> buildingTiles;
+    public int numZones;
+    public int minRadiusZones;
+    public int minDistZones;
+
+    public Sprite defaultTileSprite;
+
+    public List<Zone> currentActiveZones { get; private set; }
+    public List<Tile> resourceTiles { get; private set; }
+    public List<Tile> itemTiles { get; private set; }
+    public List<Tile> buildingTiles { get; private set; }
     private List<Tile> occupiedTiles
     {
         get {
@@ -37,10 +41,8 @@ public class MapManager : MonoBehaviour {
             return occTiles;
         }
     }
-    [HideInInspector]
     public readonly Layout layout = new Layout(Orientation.pointy, new Vector2(1, 0.6f), Vector2.zero);
-    [HideInInspector]
-    public Dictionary<Hex, Tile> map;
+    public Dictionary<Hex, Tile> map { get; private set; }
     private List<Hex> keys;
 
 
@@ -75,6 +77,7 @@ public class MapManager : MonoBehaviour {
         GenerateBuildings();
         GenerateStartingResources();
         GenerateStartingItems();
+        GenerateStartingZones();
     }
 
     void LogAllNeighbors()
@@ -115,6 +118,39 @@ public class MapManager : MonoBehaviour {
                 minRadiusItems, statType);
             if (item == null) break;
         }
+    }
+
+    void GenerateStartingZones()
+    {
+        currentActiveZones = new List<Zone>();
+        for (int i = 0; i < numZones; i++)
+        {
+            currentActiveZones.Add(GenerateZone(minRadiusZones, minDistZones));
+        }
+    }
+
+    Zone GenerateZone(int minRadius, int minDist)
+    {
+        Zone.ZoneType type = GenerateRandomZoneType();
+        Tile location = GenerateValidTile(minRadius, minDist);
+        switch (type)
+        {
+            case Zone.ZoneType.ResourceDrain:
+                return new ResourceDrainZone(location);
+            case Zone.ZoneType.TowerDepreciate:
+                return new TowerDepreciateZone(location);
+            case Zone.ZoneType.MovementSlow:
+                return new MovementSlowZone(location);
+            default:
+                return null;
+        }
+    }
+
+    Zone.ZoneType GenerateRandomZoneType()
+    {
+        ZoneTypeInfo randomTypeInfo =
+            Services.ZoneConfig.Zones[Random.Range(0, Services.ZoneConfig.Zones.Length)];
+        return randomTypeInfo.Type;
     }
 
     Item GenerateAndPlaceItem(int approxMinVal, int approxMaxVal, int minRadius, Item.StatType statType)
@@ -261,7 +297,7 @@ public class MapManager : MonoBehaviour {
     List<Item.StatType> CreateStatPool(int numEachStat)
     {
         List<Item.StatType> statPool = new List<Item.StatType>();
-        foreach(ItemStatConfig itemStatConfig in Services.ItemConfig.Items)
+        foreach(ItemStatInfo itemStatConfig in Services.ItemConfig.Items)
         {
             for (int i = 0; i < numEachStat; i++)
             {
@@ -269,5 +305,10 @@ public class MapManager : MonoBehaviour {
             }
         }
         return statPool;
+    }
+
+    public void RemoveZone(Zone zone)
+    {
+        currentActiveZones.Remove(zone);
     }
 }

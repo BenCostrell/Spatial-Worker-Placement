@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour {
     public float roundTrackerSpacing;
     public int maxTurnsShown;
     public float currTurnScaleUp;
+    public float tooltipExpandTime;
     [HideInInspector]
     public Transform canvas;
     [HideInInspector]

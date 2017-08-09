@@ -71,7 +71,7 @@ public class Selector : MonoBehaviour
         float angle = Mathf.Atan2(yInput, xInput) * Mathf.Rad2Deg;
         float convertedAngle = (angle + 330) % 360;
         int directionIndex = 5 - Mathf.FloorToInt(convertedAngle / 60f);
-        if (directionIndex != inputLastFrame || timeSinceLastUniqueInput > timeToWaitBeforeRepeatingInput)
+        if (timeSinceLastUniqueInput > timeToWaitBeforeRepeatingInput)
         {
             Tile tile;
             if (Services.MapManager.map.TryGetValue(hoveredTile.hex.Neighbor(directionIndex), out tile))

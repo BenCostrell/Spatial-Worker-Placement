@@ -6,8 +6,8 @@ using System.Collections.Generic;
 public class ItemConfig : ScriptableObject
 {
     [SerializeField]
-    private ItemStatConfig[] items;
-    public ItemStatConfig[] Items { get { return items; } }
+    private ItemStatInfo[] items;
+    public ItemStatInfo[] Items { get { return items; } }
 
     [SerializeField]
     private float spawnGrowTime;
@@ -41,9 +41,9 @@ public class ItemConfig : ScriptableObject
     private Color tooltipColor;
     public Color TooltipColor { get { return tooltipColor; } }
 
-    public ItemStatConfig GetItemStatConfig(Item.StatType statType)
+    public ItemStatInfo GetItemStatConfig(Item.StatType statType)
     {
-        foreach(ItemStatConfig itemStatConfig in items)
+        foreach(ItemStatInfo itemStatConfig in items)
         {
             if (itemStatConfig.StatType == statType) return itemStatConfig;
         }

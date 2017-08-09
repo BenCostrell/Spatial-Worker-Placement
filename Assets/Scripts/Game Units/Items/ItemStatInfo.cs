@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[CreateAssetMenu(menuName = "Item Stat Config")]
-public class ItemStatConfig : ScriptableObject
+[CreateAssetMenu(menuName = "Item Stat Info")]
+public class ItemStatInfo : ScriptableObject
 {
     [SerializeField]
     private Sprite sprite;

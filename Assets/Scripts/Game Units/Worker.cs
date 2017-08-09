@@ -46,6 +46,7 @@ public class Worker : MonoBehaviour {
     public int bonusClaimPower { get; private set; }
     public int defaultBumpPower;
     private int bumpPower;
+    public int zoneExpandPower { get; private set; }
     private List<Item> items;
     private Dictionary<Item.StatType, int> bonuses;
     private Dictionary<Item.StatType, int> tempBonuses;
@@ -256,7 +257,7 @@ public class Worker : MonoBehaviour {
         tooltipTextComp.text = tooltipText;
         tooltipTextComp.rectTransform.sizeDelta = new Vector2(textboxSize.x, 
             textboxSize.y + (extraTooltipHeightPerLine * extraLines));
-        //Services.main.ShowWorkerTooltip(tooltipText);
+        Services.main.taskManager.AddTask(new ExpandTooltip(tooltip));
     }
 
     public void HideTooltip()
@@ -457,5 +458,10 @@ public class Worker : MonoBehaviour {
     bool AnyAvailableActions()
     {
         return movesRemaining > 0;
+    }
+
+    public void DrainResources(int resourcesToDrain)
+    {
+        resourcesInHand = Mathf.Max(0, resourcesInHand - resourcesToDrain);
     }
 }

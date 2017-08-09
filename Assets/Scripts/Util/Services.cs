@@ -12,5 +12,6 @@ public static class Services {
     public static MapManager MapManager { get; set; }
     public static Main main { get; set; }
     public static ItemConfig ItemConfig { get; set; }
+    public static ZoneConfig ZoneConfig { get; set; }
     public static UIManager UIManager { get; set; }
 }

@@ -86,10 +86,22 @@ public class Main : Scene<TransitionData> {
             .Then(DecrementBuildings())
             .Then(IncrementResources())
             .Then(DecrementItemCosts())
+            .Then(new ActionTask(IncrementZones))
             .Then(new ActionTask(TempSpawnNewItems))
             .Then(new ActionTask(Services.MapManager.SpawnNewResources))
             .Then(new ActionTask(StartRound));
         taskManager.AddTask(roundEndTasks);
+    }
+
+    void IncrementZones()
+    {
+        if (Services.MapManager.currentActiveZones.Count > 0)
+        {
+            foreach (Zone zone in Services.MapManager.currentActiveZones)
+            {
+                if (zone.controller == null) zone.Expand(1);
+            }
+        }
     }
 
     void TempSpawnNewItems()
@@ -100,11 +112,14 @@ public class Main : Scene<TransitionData> {
     TaskTree IncrementResources()
     {
         TaskTree incrementEachResource = new TaskTree(new EmptyTask());
-        foreach (Tile tile in Services.MapManager.resourceTiles)
+        if (Services.MapManager.resourceTiles.Count > 0)
         {
-            if (tile.containedWorker == null)
+            foreach (Tile tile in Services.MapManager.resourceTiles)
             {
-                incrementEachResource.AddChild(new IncrementResource(tile.containedResource));
+                if (tile.containedWorker == null)
+                {
+                    incrementEachResource.AddChild(new IncrementResource(tile.containedResource));
+                }
             }
         }
         return incrementEachResource;

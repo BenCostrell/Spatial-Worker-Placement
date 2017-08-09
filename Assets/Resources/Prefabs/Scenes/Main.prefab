@@ -342,12 +342,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roundCounter: {fileID: 1561598172991150}
-  workerTooltip: {fileID: 0}
-  tileTooltip: {fileID: 0}
   roundTracker: {fileID: 1310597043030750}
   roundTrackerSpacing: 50
   maxTurnsShown: 5
   currTurnScaleUp: 1.2
+  tooltipExpandTime: 0.1
   canvas: {fileID: 0}
 --- !u!114 &114745283773572244
 MonoBehaviour:
@@ -452,6 +451,10 @@ MonoBehaviour:
   itemDistAntivariance: 3
   approxMinStartingItemVal: 2
   approxMaxStartingItemVal: 5
+  numZones: 3
+  minRadiusZones: 2
+  minDistZones: 1
+  defaultTileSprite: {fileID: 21300000, guid: eefd03fa532b4674299640790b049bb7, type: 3}
 --- !u!114 &114998950626432060
 MonoBehaviour:
   m_ObjectHideFlags: 1

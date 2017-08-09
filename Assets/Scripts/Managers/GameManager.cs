@@ -40,7 +40,8 @@ public class GameManager : MonoBehaviour {
         Services.Prefabs = Resources.Load<PrefabDB>("Prefabs/Prefabs");
         Services.SceneStackManager = new SceneStackManager<TransitionData>(sceneRoot, Services.Prefabs.Scenes);
         Services.InputManager = new InputManager();
-        Services.ItemConfig = Resources.Load<ItemConfig>("ItemConfig/Item Config");
+        Services.ItemConfig = Resources.Load<ItemConfig>("Config/ItemConfig/Item Config");
+        Services.ZoneConfig = Resources.Load<ZoneConfig>("Config/ZoneConfig/Zone Config");
     }
 
     void InitializePlayers()

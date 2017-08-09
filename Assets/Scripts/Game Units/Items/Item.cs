@@ -40,7 +40,7 @@ public class Item
         cost = Services.ItemConfig.GetValue(statBonuses) 
             + Services.ItemConfig.StartingPriceBump;
         obj.SetActive(false);
-        ItemStatConfig config = Services.ItemConfig.GetItemStatConfig(statBonuses.First().Key);
+        ItemStatInfo config = Services.ItemConfig.GetItemStatConfig(statBonuses.First().Key);
         obj.GetComponent<SpriteRenderer>().sprite = config.Sprite;
         Services.main.taskManager.AddTask(new ItemSpawnAnimation(this));
     }
@@ -101,6 +101,7 @@ public class Item
         }
         tooltip.GetComponentInChildren<Text>().text = tooltipText;
         tooltip.GetComponentInChildren<Image>().color = Services.ItemConfig.TooltipColor;
+        Services.main.taskManager.AddTask(new ExpandTooltip(tooltip));
     }
 
     public void HideTooltip()

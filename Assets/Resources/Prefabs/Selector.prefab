@@ -52,9 +52,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f046577112fce094bb3b54b9cb02cc58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseSpeed: 2
+  baseSpeed: 6
   accel: 0.075
-  maxSpeed: 10
+  maxSpeed: 12
   hoveredWorker: {fileID: 0}
 --- !u!212 &212544842897419288
 SpriteRenderer:

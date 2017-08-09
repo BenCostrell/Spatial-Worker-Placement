@@ -234,6 +234,7 @@ public class Building : MonoBehaviour {
         }
         tooltip.GetComponentInChildren<Text>().text = tooltipText;
         tooltip.GetComponentInChildren<Image>().color = tooltipColor;
+        Services.main.taskManager.AddTask(new ExpandTooltip(tooltip));
     }
 
     public void HideTooltip()
