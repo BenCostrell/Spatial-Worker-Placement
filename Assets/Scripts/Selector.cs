@@ -264,7 +264,7 @@ public class Selector : MonoBehaviour
     {
         ClearPath();
         if (selectedWorker != null) UnselectWorker();
-        PlaceOnTile(Services.MapManager.map[new Hex(0, 0, 0)]);
+        PlaceOnTile(Services.MapManager.map[new Hex(0, -1, 1)]);
         ShowAppropriateTooltip();
     }
 

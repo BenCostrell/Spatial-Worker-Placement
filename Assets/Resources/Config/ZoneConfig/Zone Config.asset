@@ -15,3 +15,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9e5f8afdb3d34294486026593ddb811e, type: 2}
   - {fileID: 11400000, guid: dc26ddffe8b816a458cab4065e18526f, type: 2}
   - {fileID: 11400000, guid: 334908d7d743c064fb043344b2466134, type: 2}
+  colorTintProportion: 0.7

@@ -14,8 +14,14 @@ public class Tile
     public Building containedBuilding;
     public Item containedItem;
     public Zone zone { get; private set; }
-    public readonly Color moveAvailableColor = new Color(0.5f, 1f, 0.5f);
-    private SpriteRenderer sr;
+    public readonly Color moveAvailableTint = new Color(1f, 1f, 0f);
+    public readonly float moveAvailableTintProportion = 1f;
+    public readonly Color moveUnavailableTint = Color.black;
+    public readonly float moveUnavailableTintProportion = 0.5f;
+    public Color currentBaseColor { get; private set; }
+    public SpriteRenderer sr { get; private set; }
+    private GameObject border;
+    public SpriteRenderer borderSr { get; private set; }
 
     public Tile(Hex hex_)
     {
@@ -25,6 +31,10 @@ public class Tile
         sr = obj.GetComponent<SpriteRenderer>();
         neighbors = new List<Tile>();
         sr.sprite = Services.MapManager.defaultTileSprite;
+        currentBaseColor = Color.white;
+        border = obj.transform.GetChild(0).gameObject;
+        borderSr = border.GetComponent<SpriteRenderer>();
+        border.SetActive(false);
     }
 
     public void EnterZone(Zone zone_)
@@ -32,6 +42,7 @@ public class Tile
         zone = zone_;
         zone.AddTile(this);
         sr.sprite = zone.sprite;
+        if (zone.controller != null) SetBaseColorFromZone(zone);
     }
 
     public void ExitZone()
@@ -39,5 +50,14 @@ public class Tile
         zone.RemoveTile(this);
         zone = null;
         sr.sprite = Services.MapManager.defaultTileSprite;
+        currentBaseColor = Color.white;
+        border.SetActive(false);
+    }
+
+    public void SetBaseColorFromZone(Zone zone)
+    {
+        border.SetActive(true);
+        currentBaseColor = zone.GetColorTint();
+        borderSr.color = currentBaseColor;
     }
 }

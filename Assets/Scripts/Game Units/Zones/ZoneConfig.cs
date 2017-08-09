@@ -8,6 +8,11 @@ public class ZoneConfig : ScriptableObject
     [SerializeField]
     private ZoneTypeInfo[] zones;
     public ZoneTypeInfo[] Zones { get { return zones; } }
+
+    [SerializeField]
+    private float colorTintProportion;
+    public float ColorTintProportion { get { return colorTintProportion; } }
+
     public ZoneTypeInfo GetZoneTypeInfo(Zone.ZoneType zoneType)
     {
         foreach (ZoneTypeInfo zoneTypeInfo in zones)

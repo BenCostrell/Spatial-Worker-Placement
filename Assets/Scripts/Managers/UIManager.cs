@@ -36,7 +36,7 @@ public class UIManager : MonoBehaviour {
     {
         selector = Instantiate(Services.Prefabs.Selector, Services.SceneStackManager.CurrentScene.transform)
             .GetComponent<Selector>();
-        selector.PlaceOnTile(Services.MapManager.map[new Hex(0, 0, 0)]);
+        selector.PlaceOnTile(Services.MapManager.map[new Hex(0, -1, 1)]);
     }
 
     int CalcPlayerTurn(int turnNum, int roundNum)

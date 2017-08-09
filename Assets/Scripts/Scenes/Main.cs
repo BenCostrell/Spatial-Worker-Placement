@@ -86,9 +86,12 @@ public class Main : Scene<TransitionData> {
             .Then(DecrementBuildings())
             .Then(IncrementResources())
             .Then(DecrementItemCosts())
+            .Then(new ActionTask(ApplyZoneEffects))
             .Then(new ActionTask(IncrementZones))
+            .Then(new ActionTask(DecrementClaimedZones))
             .Then(new ActionTask(TempSpawnNewItems))
             .Then(new ActionTask(Services.MapManager.SpawnNewResources))
+            .Then(new ActionTask(Services.MapManager.SpawnNewZones))
             .Then(new ActionTask(StartRound));
         taskManager.AddTask(roundEndTasks);
     }
@@ -100,6 +103,29 @@ public class Main : Scene<TransitionData> {
             foreach (Zone zone in Services.MapManager.currentActiveZones)
             {
                 if (zone.controller == null) zone.Expand(1);
+            }
+        }
+    }
+
+    void DecrementClaimedZones()
+    {
+        if (Services.MapManager.currentActiveZones.Count > 0)
+        {
+            for (int i = Services.MapManager.currentActiveZones.Count - 1; i >= 0; i--)
+            {
+                Zone zone = Services.MapManager.currentActiveZones[i];
+                if (zone.controller != null) zone.Decrement();
+            }
+        }
+    }
+
+    void ApplyZoneEffects()
+    {
+        if (Services.MapManager.currentActiveZones.Count > 0)
+        {
+            foreach(Zone zone in Services.MapManager.currentActiveZones)
+            {
+                if (zone.controller != null) zone.OnRoundEnd();
             }
         }
     }

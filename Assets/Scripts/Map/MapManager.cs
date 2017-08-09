@@ -24,6 +24,7 @@ public class MapManager : MonoBehaviour {
     public int numZones;
     public int minRadiusZones;
     public int minDistZones;
+    public int minDistZoneToZone;
 
     public Sprite defaultTileSprite;
 
@@ -125,14 +126,15 @@ public class MapManager : MonoBehaviour {
         currentActiveZones = new List<Zone>();
         for (int i = 0; i < numZones; i++)
         {
-            currentActiveZones.Add(GenerateZone(minRadiusZones, minDistZones));
+            currentActiveZones
+                .Add(GenerateZone(minRadiusZones, minDistZones, minDistZoneToZone));
         }
     }
 
-    Zone GenerateZone(int minRadius, int minDist)
+    Zone GenerateZone(int minRadius, int minDist, int minZoneDist)
     {
         Zone.ZoneType type = GenerateRandomZoneType();
-        Tile location = GenerateValidTile(minRadius, minDist);
+        Tile location = GenerateValidZoneTile(minRadius, minDist, minZoneDist);
         switch (type)
         {
             case Zone.ZoneType.ResourceDrain:
@@ -151,6 +153,32 @@ public class MapManager : MonoBehaviour {
         ZoneTypeInfo randomTypeInfo =
             Services.ZoneConfig.Zones[Random.Range(0, Services.ZoneConfig.Zones.Length)];
         return randomTypeInfo.Type;
+    }
+
+    Tile GenerateValidZoneTile(int minRadius, int minDist, int minZoneDist)
+    {
+        Tile tile;
+        for (int i = 0; i < maxTriesProcGen; i++)
+        {
+            tile = GenerateValidTile(minRadius, minDist);
+            if (ValidateZoneTile(tile, minZoneDist)) return tile;
+        }
+        return null;
+    }
+
+    bool ValidateZoneTile(Tile tile, int minZoneDist)
+    {
+        if (currentActiveZones.Count > 0)
+        {
+            foreach (Zone zone in currentActiveZones)
+            {
+                foreach (Tile zoneTile in zone.tiles)
+                {
+                    if (tile.hex.Distance(zoneTile.hex) < minZoneDist) return false;
+                }
+            }
+        }
+        return true;
     }
 
     Item GenerateAndPlaceItem(int approxMinVal, int approxMaxVal, int minRadius, Item.StatType statType)
@@ -185,12 +213,11 @@ public class MapManager : MonoBehaviour {
 
     Tile GenerateValidTile(int minRadius, int minDist)
     {
-        Tile tile = GenerateCandidateTile();
+        Tile tile;
         for (int i = 0; i < maxTriesProcGen; i++)
         {
             tile = GenerateCandidateTile();
-            bool isValid = ValidateTile(tile, minRadius, minDist);
-            if (isValid) return tile;
+            if(ValidateTile(tile, minRadius, minDist)) return tile;
         }
         return null;
     }
@@ -204,9 +231,13 @@ public class MapManager : MonoBehaviour {
 
     bool ValidateTile(Tile candidateTile, int minRadius, int minDist)
     {
-        if (candidateTile.hex.Length() < minRadius || candidateTile.containedWorker != null) return false;
-        if (occupiedTiles.Count == 0) return true;
-        else foreach (Tile tile in occupiedTiles) if (candidateTile.hex.Distance(tile.hex) < minDist) return false;
+        if (candidateTile.hex.Length() < minRadius || candidateTile.containedWorker != null)
+            return false;
+        if (occupiedTiles.Count == 0)
+            return true;
+        else foreach (Tile tile in occupiedTiles)
+                if (candidateTile.hex.Distance(tile.hex) < minDist)
+                    return false;
         return true;
     }
 
@@ -291,6 +322,15 @@ public class MapManager : MonoBehaviour {
         for (int i = 0; i < numNewResources; i++)
         {
             GenerateResourceTile(0, 0);
+        }
+    }
+
+    public void SpawnNewZones()
+    {
+        int numNewZones = numZones - currentActiveZones.Count;
+        for (int i = 0; i < numNewZones; i++)
+        {
+            GenerateZone(0, minDistZones, minDistZoneToZone);
         }
     }
 

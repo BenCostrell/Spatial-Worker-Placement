@@ -82,6 +82,7 @@ public class Worker : MonoBehaviour {
         bonusResourcePerPickup = 0;
         itemDiscount = 0;
         bonusClaimPower = 0;
+        zoneExpandPower = 1;
         bumpPower = defaultBumpPower;
         items = new List<Item>();
         availableGoals = new List<Tile>();
@@ -174,6 +175,10 @@ public class Worker : MonoBehaviour {
         {
             ClaimBuilding(currentTile.containedBuilding);
         }
+        if (currentTile.zone != null && currentTile.zone.controller == null)
+        {
+            currentTile.zone.GetClaimed(this);
+        }
         Services.UIManager.selector.ShowAppropriateTooltip();
         if (!AnyAvailableActions() && !forcedMovement) Services.main.EndTurn();
         if (AnyAvailableActions() && !forcedMovement) Services.UIManager.selector.SelectWorker(this);
@@ -241,7 +246,10 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        Destroy(tooltip);
+        bool animate = false;
+
+        if (tooltip != null) Destroy(tooltip);
+        else animate = true;
         tooltip = Instantiate(Services.Prefabs.Tooltip, Services.UIManager.canvas);
 
         tooltip.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
@@ -257,7 +265,7 @@ public class Worker : MonoBehaviour {
         tooltipTextComp.text = tooltipText;
         tooltipTextComp.rectTransform.sizeDelta = new Vector2(textboxSize.x, 
             textboxSize.y + (extraTooltipHeightPerLine * extraLines));
-        Services.main.taskManager.AddTask(new ExpandTooltip(tooltip));
+        if (animate) Services.main.taskManager.AddTask(new ExpandTooltip(tooltip));
     }
 
     public void HideTooltip()
@@ -410,9 +418,19 @@ public class Worker : MonoBehaviour {
         availableGoals = AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining);
         if (availableGoals.Count > 0)
         {
-            foreach (Tile tile in availableGoals)
+            //foreach (Tile tile in availableGoals)
+            //{
+            //    tile.sr.color = tile.moveAvailableTint * tile.moveAvailableTintProportion + 
+            //        Color.white * (1-tile.moveAvailableTintProportion);
+            //}
+            foreach(KeyValuePair<Hex, Tile> space in Services.MapManager.map)
             {
-                tile.obj.GetComponent<SpriteRenderer>().color = tile.moveAvailableColor;
+                Tile tile = space.Value;
+                if (!availableGoals.Contains(tile))
+                {
+                    tile.sr.color = tile.moveUnavailableTint * tile.moveAvailableTintProportion +
+                    Color.white * (1 - tile.moveUnavailableTintProportion);
+                }
             }
         }
     }
@@ -421,9 +439,17 @@ public class Worker : MonoBehaviour {
     {
         if (availableGoals.Count > 0)
         {
-            foreach (Tile tile in availableGoals)
+            //foreach (Tile tile in availableGoals)
+            //{
+            //    tile.sr.color = Color.white;
+            //}
+            foreach (KeyValuePair<Hex, Tile> space in Services.MapManager.map)
             {
-                tile.obj.GetComponent<SpriteRenderer>().color = Color.white;
+                Tile tile = space.Value;
+                if (!availableGoals.Contains(tile))
+                {
+                    tile.sr.color = Color.white;
+                }
             }
         }
         availableGoals = new List<Tile>();

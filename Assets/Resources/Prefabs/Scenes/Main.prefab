@@ -454,6 +454,7 @@ MonoBehaviour:
   numZones: 3
   minRadiusZones: 2
   minDistZones: 1
+  minDistZoneToZone: 4
   defaultTileSprite: {fileID: 21300000, guid: eefd03fa532b4674299640790b049bb7, type: 3}
 --- !u!114 &114998950626432060
 MonoBehaviour:

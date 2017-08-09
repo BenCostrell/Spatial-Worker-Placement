@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public abstract class Zone 
 {
-    protected List<Tile> tiles;
+    public List<Tile> tiles { get; protected set; }
     public Player controller { get; private set; }
     protected int expansionLevel;
     protected readonly Tile centerTile;
@@ -23,6 +23,10 @@ public abstract class Zone
     {
         controller = worker.parentPlayer;
         Expand(worker.zoneExpandPower);
+        foreach(Tile tile in tiles)
+        {
+            tile.SetBaseColorFromZone(this);
+        }
     }
 
     public void Expand(int steps)
@@ -49,7 +53,7 @@ public abstract class Zone
         }
     }
 
-    void Decrement()
+    public void Decrement()
     {
         expansionLevel -= 1;
         for (int i = tiles.Count - 1; i >= 0; i--)
@@ -87,5 +91,11 @@ public abstract class Zone
     protected virtual void OnRoundEndForWorker(Worker worker)
     {
 
+    }
+
+    public Color GetColorTint()
+    {
+        return Color.white * (1 - Services.ZoneConfig.ColorTintProportion) +
+                controller.color * Services.ZoneConfig.ColorTintProportion;
     }
 }
