@@ -27,6 +27,8 @@ MonoBehaviour:
     type: 2}
   buildingTooltip: {fileID: 1998105780145208, guid: 46c2cf6f283206d4f90fb316643ed95d,
     type: 2}
+  zoneTooltip: {fileID: 1586806509369280, guid: 703305b49fc50d34f880c23673a0af23,
+    type: 2}
   turnMarker: {fileID: 1927197091528820, guid: a91f877050bef544ab9d494c06dbddc0, type: 2}
   roundMarker: {fileID: 1089553658779628, guid: 202db23a8bbb34e4eb61ee29061d4aaf,
     type: 2}
