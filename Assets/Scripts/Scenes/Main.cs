@@ -87,8 +87,8 @@ public class Main : Scene<TransitionData> {
             .Then(IncrementResources())
             .Then(DecrementItemCosts())
             .Then(new ActionTask(ApplyZoneEffects))
-            .Then(new ActionTask(IncrementZones))
-            .Then(new ActionTask(DecrementClaimedZones))
+            .Then(IncrementZones())
+            .Then(DecrementClaimedZones())
             .Then(new ActionTask(TempSpawnNewItems))
             .Then(new ActionTask(Services.MapManager.SpawnNewResources))
             .Then(new ActionTask(Services.MapManager.SpawnNewZones))
@@ -96,27 +96,32 @@ public class Main : Scene<TransitionData> {
         taskManager.AddTask(roundEndTasks);
     }
 
-    void IncrementZones()
+    TaskTree IncrementZones()
     {
+        TaskTree incrementAllZones = new TaskTree(new EmptyTask());
         if (Services.MapManager.currentActiveZones.Count > 0)
         {
             foreach (Zone zone in Services.MapManager.currentActiveZones)
             {
-                if (zone.controller == null) zone.Expand(1);
+                if (zone.controller == null) incrementAllZones.AddChild(zone.Expand(1));
             }
         }
+        return incrementAllZones;
     }
 
-    void DecrementClaimedZones()
+    TaskTree DecrementClaimedZones()
     {
+        TaskTree decrementAllClaimedZones = new TaskTree(new EmptyTask());
         if (Services.MapManager.currentActiveZones.Count > 0)
         {
             for (int i = Services.MapManager.currentActiveZones.Count - 1; i >= 0; i--)
             {
                 Zone zone = Services.MapManager.currentActiveZones[i];
-                if (zone.controller != null) zone.Decrement();
+                if (zone.controller != null)
+                    decrementAllClaimedZones.AddChild(zone.Decrement());
             }
         }
+        return decrementAllClaimedZones;
     }
 
     void ApplyZoneEffects()

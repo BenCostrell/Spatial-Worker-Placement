@@ -130,14 +130,14 @@ public class Worker : MonoBehaviour {
     void InitiateMovement(List<Tile> path)
     {
         parentPlayer.workerMovedThisTurn = this;
-        movesRemaining -= path.Count;
+        movesRemaining -= PathCost(path);
         AnimateMovementAlongPath(path, false);
     }
 
     public bool TryToMove(Tile goal)
     {
-        List<Tile> path = AStarSearch.ShortestPath(currentTile, goal);
-        if (CanMoveAlongPath(path) && path.Count > 0) {
+        List<Tile> path = AStarSearch.ShortestPath(currentTile, goal, parentPlayer, false);
+        if (path.Count > 0 && CanMoveAlongPath(path)) {
             InitiateMovement(path);
             return true;
         }
@@ -146,7 +146,15 @@ public class Worker : MonoBehaviour {
 
     public bool CanMoveAlongPath(List<Tile> path)
     {
-        return (path.Count <= movesRemaining);
+        return (PathCost(path) <= movesRemaining);
+    }
+
+    int PathCost(List<Tile> path)
+    {
+        int totalMovementCost = 0;
+        foreach (Tile tile in path)
+            totalMovementCost += tile.movementCostPerPlayer[parentPlayer.playerNum - 1];
+        return totalMovementCost;
     }
 
     void EndForcedMovement()
@@ -302,7 +310,8 @@ public class Worker : MonoBehaviour {
         }
         else
         {
-            otherWorker.AnimateMovementAlongPath(AStarSearch.ShortestPath(otherWorker.currentTile, targetTile), 
+            otherWorker.AnimateMovementAlongPath(
+                AStarSearch.ShortestPath(otherWorker.currentTile, targetTile, parentPlayer, true), 
                 true);
         }
 
@@ -415,7 +424,7 @@ public class Worker : MonoBehaviour {
     void HighlightAvailableMoves()
     {
         ClearAvailableMoves();
-        availableGoals = AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining);
+        availableGoals = AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining, parentPlayer, false);
         if (availableGoals.Count > 0)
         {
             //foreach (Tile tile in availableGoals)

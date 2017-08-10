@@ -225,6 +225,18 @@ public class TaskTree
     {
         return Then(new TaskTree(nextTask));
     }
+
+    public int Depth()
+    {
+        if(children.Count == 0)
+        {
+            return 1;
+        }
+        else
+        {
+            return 1 + children[0].Depth();
+        }
+    }
 }
 
 public class EmptyTask : Task

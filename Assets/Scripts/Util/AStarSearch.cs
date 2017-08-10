@@ -11,7 +11,7 @@ public static class AStarSearch
         return Vector2.Distance(a.hex.ScreenPos(), b.hex.ScreenPos());
     }
 
-    public static List<Tile> ShortestPath(Tile start, Tile goal)
+    public static List<Tile> ShortestPath(Tile start, Tile goal, Player player, bool raw)
     {
         List<Tile> path = new List<Tile>();
         Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
@@ -31,7 +31,17 @@ public static class AStarSearch
             {
                 foreach (Tile next in current.neighbors)
                 {
-                    float newCost = costSoFar[current] + 1;
+                    float newCost;
+                    if (raw)
+                    {
+                        newCost = costSoFar[current] + 1;
+                    }
+                    else
+                    {
+                        newCost = costSoFar[current] 
+                            + next.movementCostPerPlayer[player.playerNum - 1];
+                    }
+                        
                     if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
                     {
                         costSoFar[next] = newCost;
@@ -53,7 +63,7 @@ public static class AStarSearch
         return path;
     }
 
-    public static List<Tile> FindAllAvailableGoals(Tile start, int movesAvailable)
+    public static List<Tile> FindAllAvailableGoals(Tile start, int movesAvailable, Player player, bool raw)
     {
         List<Tile> availableGoals = new List<Tile>();
         if (movesAvailable == 0) return availableGoals;
@@ -75,7 +85,16 @@ public static class AStarSearch
                 {
                     foreach (Tile next in current.neighbors)
                     {
-                        int newCost = costSoFar[current] + 1;
+                        int newCost;
+                        if (raw)
+                        {
+                            newCost = costSoFar[current] + 1;
+                        }
+                        else
+                        {
+                            newCost = costSoFar[current]
+                                + next.movementCostPerPlayer[player.playerNum - 1];
+                        }
                         if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
                         {
                             costSoFar[next] = newCost;

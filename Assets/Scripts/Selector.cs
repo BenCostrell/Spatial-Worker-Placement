@@ -1,12 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Selector : MonoBehaviour
 {
 
     private Tile hoveredTile;
-    private List<Tile> tilePath;
     private int inputLastFrame;
     private float timeToWaitBeforeRepeatingInput {
         get { return 1 / currentSpeed; }
@@ -26,7 +24,6 @@ public class Selector : MonoBehaviour
     {
         timeSinceLastUniqueInput = 0;
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
-        tilePath = new List<Tile>();
         transform.localScale = Services.MapManager.layout.size;
         currentSpeed = baseSpeed;
     }
@@ -132,6 +129,11 @@ public class Selector : MonoBehaviour
         {
             hoveredTile.containedBuilding.ShowTooltip();
         }
+        if (hoveredTile.zone != null)
+        {
+            if (hoveredTile.zone != lastHoveredTile.zone)
+                hoveredTile.zone.ShowTooltip();
+        }
     }
 
     void HideLastHoveredInfo()
@@ -159,6 +161,11 @@ public class Selector : MonoBehaviour
                 {
                     lastHoveredTile.containedItem.HideTooltip();
                 }
+            }
+            if (lastHoveredTile.zone != null)
+            {
+                if (hoveredTile.zone != lastHoveredTile.zone)
+                    lastHoveredTile.zone.HideTooltip();
             }
         }
     }
@@ -214,7 +221,6 @@ public class Selector : MonoBehaviour
         {
             selectedWorker.TryToMove(hoveredTile);
             UnselectWorker();
-            ClearPath();  
         }
         else {
             if (hoveredTile.containedWorker != null)
@@ -247,37 +253,18 @@ public class Selector : MonoBehaviour
 
     void HighlightPath(Tile start, Tile goal)
     {
-        List<Tile> newPath = AStarSearch.ShortestPath(start, goal);
-        if (selectedWorker.CanMoveAlongPath(newPath))
+        List<Tile> path = AStarSearch.ShortestPath(start, goal, selectedWorker.parentPlayer, false);
+        if (selectedWorker.CanMoveAlongPath(path))
         {
-            ClearPath();
-            tilePath = newPath;
-            selectedWorker.ShowPathArrow(tilePath);
-            foreach (Tile tile in tilePath)
-            {
-                //tile.obj.GetComponent<SpriteRenderer>().color = Color.gray;
-            }
+            selectedWorker.ShowPathArrow(path);
         }
     }
 
     public void Reset()
     {
-        ClearPath();
         if (selectedWorker != null) UnselectWorker();
         PlaceOnTile(Services.MapManager.map[new Hex(0, -1, 1)]);
         ShowAppropriateTooltip();
-    }
-
-    public void ClearPath()
-    {
-        if (tilePath.Count > 0)
-        {
-            foreach (Tile tile in tilePath)
-            {
-                //tile.obj.GetComponent<SpriteRenderer>().color = Color.white;
-            }
-        }
-        tilePath = new List<Tile>();
     }
 
     public void SetColor()

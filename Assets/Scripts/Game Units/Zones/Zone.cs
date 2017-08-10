@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public abstract class Zone 
 {
@@ -12,6 +13,8 @@ public abstract class Zone
     protected ZoneType type;
     protected ZoneTypeInfo zoneTypeInfo;
     public Sprite sprite { get; protected set; }
+    public bool tooltipActive { get; private set; }
+    private GameObject tooltip;
 
     public Zone(Tile centerTile_)
     {
@@ -22,58 +25,71 @@ public abstract class Zone
     public void GetClaimed(Worker worker)
     {
         controller = worker.parentPlayer;
-        Expand(worker.zoneExpandPower);
-        foreach(Tile tile in tiles)
-        {
-            tile.SetBaseColorFromZone(this);
-        }
+        foreach (Tile tile in tiles) ApplyControl(tile);
+        Services.main.taskManager.AddTask(Expand(worker.zoneExpandPower));
     }
 
-    public void Expand(int steps)
+    void ApplyControl(Tile tile)
     {
+        tile.SetBaseColorFromZone(this);
+        ApplyZoneEffectToTile(tile);
+    }
+
+    public TaskTree Expand(int steps)
+    {
+        TaskTree fullExpandTaskTree = new TaskTree(new EmptyTask());
         for (int i = 0; i < steps; i++)
         {
-            ExpandOneStep();
+            fullExpandTaskTree.Then (ExpandOneStep());
         }
+        return fullExpandTaskTree;
     }
 
-    void ExpandOneStep()
+    TaskTree ExpandOneStep()
     {
+        TaskTree expandTaskTree = new TaskTree(new EmptyTask());
         expansionLevel += 1;
         List<Tile> currentTiles = new List<Tile>(tiles);
+        List<Tile> newlyAddedTiles = new List<Tile>();
         foreach (Tile tile in currentTiles)
         {
             foreach(Tile neighbor in tile.neighbors)
             {
-                if (!tiles.Contains(neighbor))
+                if (!currentTiles.Contains(neighbor) && !newlyAddedTiles.Contains(neighbor))
                 {
-                    neighbor.EnterZone(this);
+                    expandTaskTree.Then(new TileEnterZone(neighbor, this));
+                    newlyAddedTiles.Add(neighbor);
                 }
             }
         }
+        return expandTaskTree;
     }
 
-    public void Decrement()
+    public TaskTree Decrement()
     {
+        TaskTree decrementTaskTree = new TaskTree(new EmptyTask());
         expansionLevel -= 1;
         for (int i = tiles.Count - 1; i >= 0; i--)
         {
             if (tiles[i].hex.Distance(centerTile.hex) > expansionLevel)
             {
-                tiles[i].ExitZone();
+                decrementTaskTree.Then(new TileExitZone(tiles[i]));
             }
         }
         if (expansionLevel < 0) Services.MapManager.RemoveZone(this);
+        return decrementTaskTree;
     }
 
     public void RemoveTile(Tile tile)
     {
         tiles.Remove(tile);
+        RemoveZoneEffectFromTile(tile);
     }
 
     public void AddTile(Tile tile)
     {
         tiles.Add(tile);
+        if (controller != null) ApplyControl(tile);
     }
 
     public void OnRoundEnd()
@@ -88,14 +104,32 @@ public abstract class Zone
         }
     }
 
-    protected virtual void OnRoundEndForWorker(Worker worker)
-    {
-
-    }
+    protected virtual void OnRoundEndForWorker(Worker worker) { }
 
     public Color GetColorTint()
     {
         return Color.white * (1 - Services.ZoneConfig.ColorTintProportion) +
                 controller.color * Services.ZoneConfig.ColorTintProportion;
+    }
+
+    public virtual void ApplyZoneEffectToTile(Tile tile) { }
+
+    public virtual void RemoveZoneEffectFromTile(Tile tile) { }
+
+    public void ShowTooltip()
+    {
+        tooltipActive = true;
+        tooltip = GameObject.Instantiate(Services.Prefabs.ZoneTooltip,
+            Services.UIManager.canvas);
+        RectTransform tooltipRect = tooltip.GetComponent<RectTransform>();
+        tooltipRect.anchoredPosition = new Vector2(0, 0);
+        tooltip.GetComponentInChildren<Text>().text = zoneTypeInfo.Label;
+        tooltip.GetComponentInChildren<Image>().color = Services.ZoneConfig.TooltipColor;
+        Services.main.taskManager.AddTask(new ExpandTooltip(tooltip));
+    }
+
+    public void HideTooltip()
+    {
+        if (tooltip != null) GameObject.Destroy(tooltip);
     }
 }
