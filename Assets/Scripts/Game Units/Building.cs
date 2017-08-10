@@ -160,7 +160,13 @@ public class Building : MonoBehaviour {
     public void ShowPotentialClaim(Worker worker)
     {
         hoverInfoActive = true;
-        int claimAmount = worker.resourcesInHand + worker.bonusClaimPower;
+        int claimAmount;
+        if (worker.resourcesInHand > 0)
+        {
+            claimAmount = worker.resourcesInHand + worker.bonusClaimPower;
+        }
+        else claimAmount = 0;
+
         textMesh.color = Color.cyan;
         int newPotentialTurnsLeftCounter;
         if (controller == null && claimAmount > 0)

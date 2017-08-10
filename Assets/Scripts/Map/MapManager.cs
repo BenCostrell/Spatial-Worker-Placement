@@ -126,8 +126,7 @@ public class MapManager : MonoBehaviour {
         currentActiveZones = new List<Zone>();
         for (int i = 0; i < numZones; i++)
         {
-            currentActiveZones
-                .Add(GenerateZone(minRadiusZones, minDistZones, minDistZoneToZone));
+            GenerateZone(minRadiusZones, minDistZones, minDistZoneToZone);
         }
     }
 
@@ -135,17 +134,23 @@ public class MapManager : MonoBehaviour {
     {
         Zone.ZoneType type = GenerateRandomZoneType();
         Tile location = GenerateValidZoneTile(minRadius, minDist, minZoneDist);
+        Zone zone;
         switch (type)
         {
             case Zone.ZoneType.ResourceDrain:
-                return new ResourceDrainZone(location);
+                zone = new ResourceDrainZone(location);
+                break;
             case Zone.ZoneType.TowerDepreciate:
-                return new TowerDepreciateZone(location);
+                zone = new TowerDepreciateZone(location);
+                break;
             case Zone.ZoneType.MovementSlow:
-                return new MovementSlowZone(location);
+                zone = new MovementSlowZone(location);
+                break;
             default:
                 return null;
         }
+        currentActiveZones.Add(zone);
+        return zone;
     }
 
     Zone.ZoneType GenerateRandomZoneType()

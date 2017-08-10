@@ -92,19 +92,24 @@ public abstract class Zone
         if (controller != null) ApplyControl(tile);
     }
 
-    public void OnRoundEnd()
+    public TaskTree OnRoundEnd()
     {
-        foreach(Tile tile in tiles)
+        TaskTree roundEndTree = new TaskTree(new EmptyTask());
+        foreach (Tile tile in tiles)
         {
             if (tile.containedWorker != null && 
                 tile.containedWorker.parentPlayer != controller)
             {
-                OnRoundEndForWorker(tile.containedWorker);
+                roundEndTree.AddChild(OnRoundEndForWorker(tile.containedWorker));
             }
         }
+        return roundEndTree;
     }
 
-    protected virtual void OnRoundEndForWorker(Worker worker) { }
+    protected virtual TaskTree OnRoundEndForWorker(Worker worker)
+    {
+        return new TaskTree(new EmptyTask());
+    }
 
     public Color GetColorTint()
     {

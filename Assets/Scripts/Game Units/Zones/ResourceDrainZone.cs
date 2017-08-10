@@ -11,8 +11,8 @@ public class ResourceDrainZone : Zone
         centerTile.EnterZone(this);
     }
 
-    protected override void OnRoundEndForWorker(Worker worker)
+    protected override TaskTree OnRoundEndForWorker(Worker worker)
     {
-        worker.DrainResources(1);
+        return new TaskTree(new DrainResources(worker, 1));
     }
 }

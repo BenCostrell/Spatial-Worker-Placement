@@ -45,6 +45,7 @@ public class Tile
 
     public void EnterZone(Zone zone_)
     {
+        if (zone != null) ExitZone();
         zone = zone_;
         zone.AddTile(this);
         sr.sprite = zone.sprite;
