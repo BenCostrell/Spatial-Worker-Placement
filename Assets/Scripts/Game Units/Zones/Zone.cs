@@ -38,31 +38,25 @@ public abstract class Zone
     public TaskTree Expand(int steps)
     {
         TaskTree fullExpandTaskTree = new TaskTree(new EmptyTask());
+        List<Tile> currentTiles = new List<Tile>(tiles);
         for (int i = 0; i < steps; i++)
         {
-            fullExpandTaskTree.Then (ExpandOneStep());
-        }
-        return fullExpandTaskTree;
-    }
-
-    TaskTree ExpandOneStep()
-    {
-        TaskTree expandTaskTree = new TaskTree(new EmptyTask());
-        expansionLevel += 1;
-        List<Tile> currentTiles = new List<Tile>(tiles);
-        List<Tile> newlyAddedTiles = new List<Tile>();
-        foreach (Tile tile in currentTiles)
-        {
-            foreach(Tile neighbor in tile.neighbors)
+            expansionLevel += 1;
+            List<Tile> newlyAddedTiles = new List<Tile>();
+            foreach (Tile tile in currentTiles)
             {
-                if (!currentTiles.Contains(neighbor) && !newlyAddedTiles.Contains(neighbor))
+                foreach (Tile neighbor in tile.neighbors)
                 {
-                    expandTaskTree.Then(new TileEnterZone(neighbor, this));
-                    newlyAddedTiles.Add(neighbor);
+                    if (!currentTiles.Contains(neighbor) && !newlyAddedTiles.Contains(neighbor))
+                    {
+                        fullExpandTaskTree.Then(new TileEnterZone(neighbor, this));
+                        newlyAddedTiles.Add(neighbor);
+                    }
                 }
             }
+            currentTiles.AddRange(newlyAddedTiles);
         }
-        return expandTaskTree;
+        return fullExpandTaskTree;
     }
 
     public TaskTree Decrement()
@@ -73,7 +67,7 @@ public abstract class Zone
         {
             if (tiles[i].hex.Distance(centerTile.hex) > expansionLevel)
             {
-                decrementTaskTree.Then(new TileExitZone(tiles[i]));
+                decrementTaskTree.Then(new TileExitZone(tiles[i], this));
             }
         }
         if (expansionLevel < 0) Services.MapManager.RemoveZone(this);

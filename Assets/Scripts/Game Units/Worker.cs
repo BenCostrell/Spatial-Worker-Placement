@@ -188,6 +188,10 @@ public class Worker : MonoBehaviour {
             currentTile.zone.GetClaimed(this);
         }
         Services.UIManager.selector.ShowAppropriateTooltip();
+        if (Services.main.gameOver)
+        {
+            return;
+        }
         if (!AnyAvailableActions() && !forcedMovement) Services.main.EndTurn();
         if (AnyAvailableActions() && !forcedMovement) Services.UIManager.selector.SelectWorker(this);
     }

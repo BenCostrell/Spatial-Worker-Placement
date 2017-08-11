@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour {
     public GameObject roundCounter;
     public GameObject roundTracker;
+    public GameObject winMessage;
     public float roundTrackerSpacing;
     public int maxTurnsShown;
     public float currTurnScaleUp;
@@ -21,6 +22,7 @@ public class UIManager : MonoBehaviour {
     {
         CreateSelector();
         trackerCurrentTurnNum = -1;
+        winMessage.SetActive(false);
     }
 
     public void UpdateUI()
@@ -71,5 +73,14 @@ public class UIManager : MonoBehaviour {
                 tempRoundNum += 1;
             }
         }
+    }
+
+    public void ShowWinMessage(Player winner)
+    {
+        winMessage.SetActive(true);
+        Image image = winMessage.GetComponent<Image>();
+        image.color = new Color(winner.color.r, winner.color.g, winner.color.b, image.color.a);
+        Text winText = winMessage.GetComponentInChildren<Text>();
+        winText.text = winner.name + " WINS";
     }
 }

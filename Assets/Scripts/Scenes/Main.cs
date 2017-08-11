@@ -21,6 +21,7 @@ public class Main : Scene<TransitionData> {
     [HideInInspector]
     public Camera mainCamera { get; private set; }
     private bool turnEnding;
+    public bool gameOver { get; private set; }
 
     // Use this for initialization
     void Start () {
@@ -103,7 +104,8 @@ public class Main : Scene<TransitionData> {
         {
             foreach (Zone zone in Services.MapManager.currentActiveZones)
             {
-                if (zone.controller == null) incrementAllZones.AddChild(zone.Expand(1));
+                if (zone.controller == null)
+                    incrementAllZones.AddChild(zone.Expand(Services.ZoneConfig.ExpansionRate));
             }
         }
         return incrementAllZones;
@@ -245,19 +247,20 @@ public class Main : Scene<TransitionData> {
         }
     }
 
-    public void CheckForWin()
+    public void CheckForWin(Player player)
     {
-        foreach(Player player in Services.GameManager.players)
+        if (player.claimedBuildings.Count >= numBuildingClaimsToWin)
         {
-            if (player.claimedBuildings.Count >= numBuildingClaimsToWin)
-            {
-                GameWin(player);
-            }
+            GameWin(player);
         }
     }
 
     void GameWin(Player player)
     {
+        gameOver = true;
+        Services.UIManager.selector.gameObject.SetActive(false);
+        Services.UIManager.ShowWinMessage(player);
+
         Debug.Log("player " + player.playerNum + " has won");
     }
 }

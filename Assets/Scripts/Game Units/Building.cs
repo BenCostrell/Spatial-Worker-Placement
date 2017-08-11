@@ -109,7 +109,7 @@ public class Building : MonoBehaviour {
         turnsLeft = initialTurnsLeft;
         player.claimedBuildings.Add(this);
         foreach(Worker worker in player.workers) worker.GetTempBonuses(statBonuses);
-        Services.main.CheckForWin();
+        Services.main.CheckForWin(player);
     }
 
     void LoseControl()

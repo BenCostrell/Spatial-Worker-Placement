@@ -21,6 +21,10 @@ public class ZoneConfig : ScriptableObject
     private float expandTime;
     public float ExpandTime { get { return expandTime; } }
 
+    [SerializeField]
+    private int expansionRate;
+    public int ExpansionRate { get { return expansionRate; } }
+
     public ZoneTypeInfo GetZoneTypeInfo(Zone.ZoneType zoneType)
     {
         foreach (ZoneTypeInfo zoneTypeInfo in zones)

@@ -96,8 +96,10 @@ public class Item
 
     public void ShowPotentialPurchasePrice(Worker worker)
     {
-        costText.text = Mathf.Max(1, cost - worker.itemDiscount).ToString();
-        costText.color = Color.cyan;
+        int price = Mathf.Max(1, cost - worker.itemDiscount);
+        if (price <= worker.resourcesInHand) costText.color = Color.cyan;
+        else costText.color = Color.red / 2 + Color.black / 2;
+        costText.text = price.ToString();
         hoverInfoActive = true;
     }
 

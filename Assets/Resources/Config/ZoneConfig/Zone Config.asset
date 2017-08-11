@@ -18,3 +18,4 @@ MonoBehaviour:
   colorTintProportion: 0.7
   tooltipColor: {r: 0.9396552, g: 1, b: 0.375, a: 0.797}
   expandTime: 0.04
+  expansionRate: 2
