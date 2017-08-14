@@ -18,6 +18,13 @@ public class Selector : MonoBehaviour
     public Worker hoveredWorker;
     private Worker selectedWorker;
     private Tile lastHoveredTile;
+    [SerializeField]
+    private float pulseCyclePeriod;
+    [SerializeField]
+    private float pulseSize;
+    private float pulseCycleTime;
+    private bool pulseGrow;
+    private Vector3 baseScale;
 
     // Use this for initialization
     void Start()
@@ -26,11 +33,14 @@ public class Selector : MonoBehaviour
         Services.EventManager.Register<ButtonPressed>(OnButtonPressed);
         transform.localScale = Services.MapManager.layout.size;
         currentSpeed = baseSpeed;
+        baseScale = transform.localScale;
+        pulseGrow = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+        Pulse();
         ProcessInput();
     }
 
@@ -42,6 +52,28 @@ public class Selector : MonoBehaviour
         HideLastHoveredInfo();
         ShowOnHoverInfo();
         lastHoveredTile = tile;
+    }
+
+    void Pulse()
+    {
+        pulseCycleTime += Time.deltaTime;
+
+        if (pulseGrow)
+        {
+            transform.localScale = Vector3.Lerp(baseScale, pulseSize * baseScale,
+                Easing.QuadEaseOut(pulseCycleTime / pulseCyclePeriod));
+        }
+        else
+        {
+            transform.localScale = Vector3.Lerp(pulseSize * baseScale, baseScale,
+                Easing.QuadEaseOut(pulseCycleTime / pulseCyclePeriod));
+        }
+
+        if (pulseCycleTime >= pulseCyclePeriod)
+        {
+            pulseGrow = !pulseGrow;
+            pulseCycleTime = 0;
+        }
     }
 
     void ProcessInput()

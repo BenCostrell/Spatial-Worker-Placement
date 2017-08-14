@@ -45,7 +45,8 @@ public class UIManager : MonoBehaviour {
 
     void CreateSelector()
     {
-        selector = Instantiate(Services.Prefabs.Selector, Services.SceneStackManager.CurrentScene.transform)
+        selector = Instantiate(Services.Prefabs.Selector, 
+            Services.SceneStackManager.CurrentScene.transform)
             .GetComponent<Selector>();
         selector.PlaceOnTile(Services.MapManager.map[new Hex(0, -1, 1)]);
     }
