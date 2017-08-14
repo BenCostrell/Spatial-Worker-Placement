@@ -7,10 +7,16 @@ public class UIManager : MonoBehaviour {
     public GameObject roundCounter;
     public GameObject roundTracker;
     public GameObject winMessage;
+    public GameObject turnBanner;
+    public GameObject bannerSandwichTop;
+    public GameObject bannerSandwichBottom;
     public float roundTrackerSpacing;
     public int maxTurnsShown;
     public float currTurnScaleUp;
     public float tooltipExpandTime;
+    public float bannerScrollTime;
+    public Vector2 bannerOffset;
+    public Vector2 sandwichOffset;
     [HideInInspector]
     public Transform canvas;
     [HideInInspector]
@@ -23,6 +29,9 @@ public class UIManager : MonoBehaviour {
         CreateSelector();
         trackerCurrentTurnNum = -1;
         winMessage.SetActive(false);
+        turnBanner.SetActive(false);
+        bannerSandwichBottom.SetActive(false);
+        bannerSandwichTop.SetActive(false);
     }
 
     public void UpdateUI()

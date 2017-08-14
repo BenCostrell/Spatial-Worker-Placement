@@ -60,11 +60,11 @@ public class Item
             new FloatItem(this)}));
     }
 
-    public void GetAcquired()
+    public void GetAcquired(Worker worker)
     {
         TaskQueue acquisitionTasks = new TaskQueue();
         MakeInaccessible();
-        acquisitionTasks.Add(new GetItemAnimation(this));
+        acquisitionTasks.Add(new GetItemAnimation(this, worker));
         acquisitionTasks.Add(new ActionTask(DestroyThis));
         Services.main.taskManager.AddTask(acquisitionTasks);
     }

@@ -37,6 +37,7 @@ public abstract class Zone
 
     public TaskTree Expand(int steps)
     {
+        Services.main.activeAnimations += 1;
         TaskTree fullExpandTaskTree = new TaskTree(new EmptyTask());
         List<Tile> currentTiles = new List<Tile>(tiles);
         for (int i = 0; i < steps; i++)
@@ -56,7 +57,14 @@ public abstract class Zone
             }
             currentTiles.AddRange(newlyAddedTiles);
         }
+
+        fullExpandTaskTree.Then(new ActionTask(DoneAnimation));
         return fullExpandTaskTree;
+    }
+
+    void DoneAnimation()
+    {
+        Services.main.activeAnimations -= 1;
     }
 
     public TaskTree Decrement()

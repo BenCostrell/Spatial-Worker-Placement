@@ -59,7 +59,7 @@ public class Worker : MonoBehaviour {
     [HideInInspector]
     public Hex lastDirectionMoved;
     [HideInInspector]
-    public bool midAnimation;
+    public int activeAnimations;
     [HideInInspector]
     public int mostRecentResourceAcquisition;
 
@@ -83,6 +83,7 @@ public class Worker : MonoBehaviour {
         itemDiscount = 0;
         bonusClaimPower = 0;
         zoneExpandPower = 1;
+        activeAnimations = 0;
         bumpPower = defaultBumpPower;
         items = new List<Item>();
         availableGoals = new List<Tile>();
@@ -111,7 +112,7 @@ public class Worker : MonoBehaviour {
 
     void AnimateMovementAlongPath(List<Tile> path, bool forcedMovement)
     {
-        midAnimation = true;
+        Services.main.activeAnimations += 1;
         TaskQueue movementTasks = new TaskQueue();
 
         for (int i = path.Count - 1; i >= 0; i--)
@@ -169,7 +170,7 @@ public class Worker : MonoBehaviour {
 
     void EndMovement(bool forcedMovement)
     {
-        midAnimation = false;
+        Services.main.activeAnimations -= 1;
         if (currentTile.containedResource != null && resourcesInHand < carryingCapacity)
         {
             ClaimResources(currentTile.containedResource);
@@ -351,7 +352,7 @@ public class Worker : MonoBehaviour {
 
     public void AcquireItem(Item item)
     {
-        item.GetAcquired();
+        item.GetAcquired(this);
         resourcesInHand -= AdjustedItemCost(item);
         items.Add(item);
         foreach (KeyValuePair<Item.StatType, int> entry in item.statBonuses)

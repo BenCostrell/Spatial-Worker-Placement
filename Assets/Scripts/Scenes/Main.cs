@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class Main : Scene<TransitionData> {
-
-
     [HideInInspector]
     public Player currentActivePlayer { get; private set; }
     [HideInInspector]
@@ -22,6 +20,7 @@ public class Main : Scene<TransitionData> {
     public Camera mainCamera { get; private set; }
     private bool turnEnding;
     public bool gameOver { get; private set; }
+    public int activeAnimations;
 
     // Use this for initialization
     void Start () {
@@ -40,6 +39,7 @@ public class Main : Scene<TransitionData> {
         Services.MapManager.CreateHexGrid();
         PlaceInitialWorkers();
         roundNum = 0;
+        activeAnimations = 0;
         Services.UIManager.canvas = GetComponentInChildren<Canvas>().transform;
         mainCamera = GetComponentInChildren<Camera>();
         Services.UIManager.InitUI();
@@ -78,12 +78,17 @@ public class Main : Scene<TransitionData> {
         currentActivePlayer = Services.GameManager.players[(roundNum - 1) % Services.GameManager.numPlayers];
         foreach (Player player in Services.GameManager.players) player.Refresh();
         Services.UIManager.UpdateUI();
+        TaskTree roundStartTasks = new TaskTree(new WaitTask(0.5f));
+        roundStartTasks
+            .Then(new ScrollTurnBanner(currentActivePlayer));
+        taskManager.AddTask(roundStartTasks);
     }
 
     void EndRound()
     {
         TaskTree roundEndTasks = new TaskTree(new EmptyTask());
         roundEndTasks
+            .Then(new ScrollTurnBanner(null))
             .Then(DecrementBuildings())
             .Then(IncrementResources())
             .Then(DecrementItemCosts())
@@ -189,9 +194,18 @@ public class Main : Scene<TransitionData> {
     {
         if (!turnEnding)
         {
-            WaitForAnimations waitForAnimations = new WaitForAnimations();
-            waitForAnimations.Then(new ActionTask(ActuallyEndTurn));
-            taskManager.AddTask(waitForAnimations);
+            currentActivePlayer.workerMovedThisTurn.EndTurn();
+            currentActivePlayer.workerMovedThisTurn = null;
+            Player nextPlayer = DetermineNextPlayer();
+            TaskQueue turnEndTasks = new TaskQueue();
+            turnEndTasks.Add(new EmptyTask());
+            turnEndTasks.Add(new WaitForAnimations());
+            if (nextPlayer != null)
+            {
+                turnEndTasks.Add(new ScrollTurnBanner(nextPlayer));
+            }
+            turnEndTasks.Add(new ActionTask(ActuallyEndTurn));
+            taskManager.AddTask(turnEndTasks);
             turnEnding = true;
         }
     }
@@ -199,8 +213,6 @@ public class Main : Scene<TransitionData> {
     void ActuallyEndTurn()
     {
         Services.UIManager.selector.Reset();
-        currentActivePlayer.workerMovedThisTurn.EndTurn();
-        currentActivePlayer.workerMovedThisTurn = null;
         Player nextPlayer = DetermineNextPlayer();
         if (nextPlayer == null) EndRound();
         else

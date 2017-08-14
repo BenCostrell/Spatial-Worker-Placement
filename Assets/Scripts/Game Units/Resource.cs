@@ -118,7 +118,7 @@ public class Resource : MonoBehaviour {
     void GetFullyAcquired(Worker worker)
     { 
         TaskQueue animationSequence = new TaskQueue(new List<Task>() {
-            new GetResourceAnimation(this),
+            new GetResourceAnimation(this, worker),
             new ActionTask(DestroyThis),
             new ResourceAcquisitionAnimation(worker)
             });
