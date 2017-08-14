@@ -429,7 +429,8 @@ public class Worker : MonoBehaviour {
     void HighlightAvailableMoves()
     {
         ClearAvailableMoves();
-        availableGoals = AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining, parentPlayer, false);
+        availableGoals = 
+            AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining, parentPlayer, false);
         if (availableGoals.Count > 0)
         {
             //foreach (Tile tile in availableGoals)
@@ -497,7 +498,9 @@ public class Worker : MonoBehaviour {
 
     bool AnyAvailableActions()
     {
-        return movesRemaining > 0;
+        List<Tile> availableMoves = 
+            AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining, parentPlayer, false);
+        return availableMoves.Count > 0;
     }
 
     public void DrainResources(int resourcesToDrain)
