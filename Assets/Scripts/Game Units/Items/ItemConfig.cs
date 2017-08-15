@@ -22,6 +22,10 @@ public class ItemConfig : ScriptableObject
     public int StartingPriceBump { get { return startingPriceBump; } }
 
     [SerializeField]
+    private int discountDecrement;
+    public int DiscountDecrement { get { return discountDecrement; } }
+
+    [SerializeField]
     private float decrementAnimTime;
     public float DecrementAnimTime { get { return decrementAnimTime; } }
 

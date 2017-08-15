@@ -56,6 +56,8 @@ MonoBehaviour:
   accel: 0.075
   maxSpeed: 12
   hoveredWorker: {fileID: 0}
+  pulseCyclePeriod: 0.2
+  pulseSize: 1.1
 --- !u!212 &212544842897419288
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -88,7 +90,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 467bb604c5a9a9d48969eebf79ffd7be, type: 3}
+  m_Sprite: {fileID: 21300000, guid: be4fad1fdb25d7542bd236aedc8ccb0f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

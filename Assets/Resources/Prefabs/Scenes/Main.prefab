@@ -540,6 +540,7 @@ MonoBehaviour:
   resGainAnimOffset: 1
   resGainAnimDur: 0.4
   resGainAnimDist: 1.5
+  activeAnimations: 0
 --- !u!114 &114701429970342920
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -688,19 +689,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 6
-  resourceTilesMin: 6
-  resourceTilesMax: 6
-  resourceAmtMin: 1
-  resourceAmtMax: 3
+  resourceTilesMin: 8
+  resourceTilesMax: 8
+  resourceAmtMin: 5
+  resourceAmtMax: 5
+  resourceAmtIncrement: 5
   maxTriesProcGen: 200
-  minDistResourceTiles: 3
+  minDistResourceTiles: 2
   minRadiusResourceTiles: 3
   minRadiusItems: 3
   minDistItems: 2
   numItems: 5
   itemDistAntivariance: 3
-  approxMinStartingItemVal: 2
-  approxMaxStartingItemVal: 5
+  approxMinStartingItemVal: 15
+  approxMaxStartingItemVal: 25
   numZones: 3
   minRadiusZones: 4
   minDistZones: 1

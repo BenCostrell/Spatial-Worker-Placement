@@ -148,6 +148,7 @@ MonoBehaviour:
   noiseMag: 0.1
   acquireAnimDur: 0.4
   acquireAnimOffsetY: 1.5
+  growthRate: 5
   animating: 0
 --- !u!212 &212684977519041216
 SpriteRenderer:

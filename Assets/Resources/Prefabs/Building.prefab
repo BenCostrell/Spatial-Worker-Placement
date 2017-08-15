@@ -289,6 +289,7 @@ MonoBehaviour:
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
   offset: {x: 0, y: 0.6}
   tooltipColor: {r: 0.36764705, g: 1, b: 0.42434075, a: 0.784}
+  decrementRate: 10
   permanentControlThreshold: 6
   permanentControlScaleIncrease: 1.2
   decrementAnimTime: 0.5

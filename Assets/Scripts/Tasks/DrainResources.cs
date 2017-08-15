@@ -17,6 +17,7 @@ public class DrainResources : Task
     public DrainResources(Worker worker_, int resourcesDrained_)
     {
         worker = worker_;
+        resourcesDrained = resourcesDrained_;
     }
 
     protected override void Init()

@@ -50,7 +50,8 @@ public class Item
         costText = obj.GetComponentInChildren<TextMesh>();
         costText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         defaultTextColor = costText.color;
-        cost = Services.ItemConfig.GetValue(statBonuses) 
+        cost = ((Services.ItemConfig.GetValue(statBonuses)/Services.MapManager.resourceAmtIncrement) 
+            * Services.MapManager.resourceAmtIncrement)
             + Services.ItemConfig.StartingPriceBump;
         obj.SetActive(false);
         ItemStatInfo config = Services.ItemConfig.GetItemStatConfig(statBonuses.First().Key);
@@ -71,7 +72,7 @@ public class Item
 
     public void DecrementCost()
     {
-        cost -= 1;
+        cost -= Services.ItemConfig.DiscountDecrement;
         if (cost <= 0) MakeInaccessibleAndDestroy();
     }
 

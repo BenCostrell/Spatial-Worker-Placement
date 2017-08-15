@@ -18,7 +18,10 @@ public class TowerDepreciateZone : Zone
         {
             foreach(Building building in worker.parentPlayer.claimedBuildings)
             {
-                roundEndTree.AddChild(new DecrementBuilding(building));
+                for (int i = 0; i < zoneTypeInfo.EffectMagnitude; i++)
+                {
+                    roundEndTree.AddChild(new DecrementBuilding(building));
+                }
             }
         }
         return roundEndTree;

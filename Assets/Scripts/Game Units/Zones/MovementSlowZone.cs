@@ -27,7 +27,7 @@ public class MovementSlowZone : Zone
             {
                 if (i != controller.playerNum - 1)
                 {
-                    tile.movementCostPerPlayer[i] = 2;
+                    tile.movementCostPerPlayer[i] = zoneTypeInfo.EffectMagnitude;
                 }
             }
         }

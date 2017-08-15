@@ -71,8 +71,10 @@ public class ScrollTurnBanner : Task
 
         if (timeElapsed <= duration / 2)
         {
-            bannerRect.anchoredPosition = Vector2.Lerp(midPos - offset, midPos,
-            Easing.ExpoEaseOut(timeElapsed / (duration / 2)));
+            bannerRect.anchoredPosition = Vector2.Lerp(
+                midPos - offset,
+                midPos,
+                Easing.ExpoEaseOut(timeElapsed / (duration / 2)));
             sandwichBottomRect.anchoredPosition = Vector2.Lerp(
                 sandwichBottomMidPos - sandwichOffset,
                 sandwichBottomMidPos,
@@ -84,8 +86,10 @@ public class ScrollTurnBanner : Task
         }
         else
         {
-            bannerRect.anchoredPosition = Vector2.Lerp(midPos, midPos + offset,
-            Easing.ExpoEaseIn((timeElapsed - (duration / 2)) / (duration / 2)));
+            bannerRect.anchoredPosition = Vector2.Lerp(
+                midPos, 
+                midPos + offset,
+                Easing.ExpoEaseIn((timeElapsed - (duration / 2)) / (duration / 2)));
             sandwichBottomRect.anchoredPosition = Vector2.Lerp(
                 sandwichBottomMidPos,
                 sandwichBottomMidPos - sandwichOffset,

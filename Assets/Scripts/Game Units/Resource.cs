@@ -44,6 +44,8 @@ public class Resource : MonoBehaviour {
     public float noiseMag;
     public float acquireAnimDur;
     public float acquireAnimOffsetY;
+    [SerializeField]
+    private int growthRate;
     [HideInInspector]
     public bool animating;
 
@@ -112,7 +114,7 @@ public class Resource : MonoBehaviour {
 
     public void Increment()
     {
-        numResources += 1;
+        numResources += growthRate;
     }
 
     void GetFullyAcquired(Worker worker)

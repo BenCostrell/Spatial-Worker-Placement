@@ -182,7 +182,7 @@ public class Main : Scene<TransitionData> {
         foreach (Tile tile in Services.MapManager.buildingTiles)
         {
             if (!tile.containedBuilding.permanentlyControlled && 
-                tile.containedBuilding.turnsLeft > 0)
+                tile.containedBuilding.claimAmountLeft > 0)
             {
                 decrementEachBuilding.AddChild(new DecrementBuilding(tile.containedBuilding));
             }

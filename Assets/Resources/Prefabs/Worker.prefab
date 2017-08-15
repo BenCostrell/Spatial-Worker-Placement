@@ -202,11 +202,11 @@ MonoBehaviour:
   extraTooltipHeightPerLine: 25
   offset: {x: 0, y: 0.1}
   startingMaxMovement: 3
-  startingCarryingCapacity: 5
+  startingCarryingCapacity: 25
   defaultBumpPower: 2
   movedThisRound: 0
   selected: 0
-  midAnimation: 0
+  activeAnimations: 0
   mostRecentResourceAcquisition: 0
 --- !u!120 &120075436400527520
 LineRenderer:

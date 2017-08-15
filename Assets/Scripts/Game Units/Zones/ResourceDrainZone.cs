@@ -13,6 +13,6 @@ public class ResourceDrainZone : Zone
 
     protected override TaskTree OnRoundEndForWorker(Worker worker)
     {
-        return new TaskTree(new DrainResources(worker, 1));
+        return new TaskTree(new DrainResources(worker, zoneTypeInfo.EffectMagnitude));
     }
 }

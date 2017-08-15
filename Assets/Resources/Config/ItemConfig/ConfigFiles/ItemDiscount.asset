@@ -15,3 +15,4 @@ MonoBehaviour:
   cost: 2
   statType: 3
   label: Item Discount
+  roundToNearest: 5

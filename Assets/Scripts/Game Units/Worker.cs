@@ -392,10 +392,13 @@ public class Worker : MonoBehaviour {
 
     public void ClaimBuilding(Building building)
     {
-        if (resourcesInHand > 0)
+        if (resourcesInHand >= building.decrementRate)
         {
-            building.GetClaimed(parentPlayer, resourcesInHand + bonusClaimPower);
-            resourcesInHand = 0;
+            int claimAmount = ((resourcesInHand + bonusClaimPower) / building.decrementRate)
+                * building.decrementRate;
+            building.GetClaimed(parentPlayer, claimAmount);
+            resourcesInHand -= (resourcesInHand / building.decrementRate) 
+                * building.decrementRate;
         }
     }
 

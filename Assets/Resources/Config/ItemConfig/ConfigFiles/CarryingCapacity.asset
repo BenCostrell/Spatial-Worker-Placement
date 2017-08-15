@@ -15,3 +15,4 @@ MonoBehaviour:
   cost: 2
   statType: 1
   label: Carrying Capacity
+  roundToNearest: 5
