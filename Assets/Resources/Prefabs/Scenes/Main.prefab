@@ -129,6 +129,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1318142375488108
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 224197689229291764}
+  m_Layer: 5
+  m_Name: TowerTracker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1325439750963748
 GameObject:
   m_ObjectHideFlags: 1
@@ -558,6 +573,8 @@ MonoBehaviour:
   turnBanner: {fileID: 1519483595916034}
   bannerSandwichTop: {fileID: 1156094832644672}
   bannerSandwichBottom: {fileID: 1000806806666176}
+  towerTracker: {fileID: 1318142375488108}
+  towerTrackerSpacing: {x: 50, y: 70}
   roundTrackerSpacing: 50
   maxTurnsShown: 5
   currTurnScaleUp: 1.2
@@ -873,6 +890,7 @@ RectTransform:
   - {fileID: 224761513276736016}
   - {fileID: 224595095328458780}
   - {fileID: 224665214469026722}
+  - {fileID: 224197689229291764}
   m_Father: {fileID: 4982843537992224}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -899,6 +917,24 @@ RectTransform:
   m_AnchoredPosition: {x: 30, y: 0}
   m_SizeDelta: {x: 750, y: 280}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!224 &224197689229291764
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1318142375488108}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 224151447614559388}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -30, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 1, y: 0}
 --- !u!224 &224201350012201152
 RectTransform:
   m_ObjectHideFlags: 1

@@ -32,3 +32,5 @@ MonoBehaviour:
   turnMarker: {fileID: 1927197091528820, guid: a91f877050bef544ab9d494c06dbddc0, type: 2}
   roundMarker: {fileID: 1089553658779628, guid: 202db23a8bbb34e4eb61ee29061d4aaf,
     type: 2}
+  towerTrackerElement: {fileID: 1208661900587240, guid: a480268b21d445447aebf2119dad817e,
+    type: 2}

@@ -10,9 +10,17 @@ public class UIManager : MonoBehaviour {
     public GameObject turnBanner;
     public GameObject bannerSandwichTop;
     public GameObject bannerSandwichBottom;
-    public float roundTrackerSpacing;
-    public int maxTurnsShown;
-    public float currTurnScaleUp;
+    public GameObject towerTracker;
+    private Color defaultTowerTrackerColor;
+    private GameObject[,] towerUIElements;
+    [SerializeField]
+    private Vector2 towerTrackerSpacing;
+    [SerializeField]
+    private float roundTrackerSpacing;
+    [SerializeField]
+    private int maxTurnsShown;
+    [SerializeField]
+    private float currTurnScaleUp;
     public float tooltipExpandTime;
     public float bannerScrollTime;
     public Vector2 bannerOffset;
@@ -32,6 +40,7 @@ public class UIManager : MonoBehaviour {
         turnBanner.SetActive(false);
         bannerSandwichBottom.SetActive(false);
         bannerSandwichTop.SetActive(false);
+        InitTowerUI();
     }
 
     public void UpdateUI()
@@ -41,6 +50,50 @@ public class UIManager : MonoBehaviour {
         selector.SetColor();
         trackerCurrentTurnNum += 1;
         SetRoundTracker();
+    }
+
+    void InitTowerUI()
+    {
+        towerUIElements = new GameObject[
+            Services.GameManager.numPlayers, 
+            Services.main.numBuildingClaimsToWin];
+        Vector2 nextElementLocation = Vector2.zero;
+        for (int i = 0; i < Services.GameManager.numPlayers; i++)
+        {
+            for (int j = 0; j < Services.main.numBuildingClaimsToWin; j++)
+            {
+                GameObject towerElement = 
+                    Instantiate(Services.Prefabs.TowerTrackerElement, towerTracker.transform);
+                towerElement.GetComponent<RectTransform>().anchoredPosition = 
+                    nextElementLocation;
+                towerUIElements[i,j] = towerElement;
+                nextElementLocation += new Vector2(0, towerTrackerSpacing.y);
+                defaultTowerTrackerColor = towerElement.GetComponent<Image>().color;
+            }
+            nextElementLocation = new Vector2(
+                nextElementLocation.x + towerTrackerSpacing.x, 
+                0);
+        }
+    }
+
+    public void UpdateTowerUI()
+    {
+        for (int i = 0; i < Services.GameManager.numPlayers; i++)
+        {
+            for (int j = 0; j < Services.main.numBuildingClaimsToWin; j++)
+            {
+                if (j < Services.GameManager.players[i].claimedBuildings.Count)
+                {
+                    towerUIElements[i, j].GetComponent<Image>().color =
+                            Services.GameManager.players[i].color;
+                }
+                else
+                {
+                    towerUIElements[i, j].GetComponent<Image>().color = 
+                        defaultTowerTrackerColor;
+                }
+            }
+        }
     }
 
     void CreateSelector()

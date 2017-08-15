@@ -34,7 +34,7 @@ public class Building : MonoBehaviour {
         {
             claimAmountLeft_ = value;
             if (value == 0) textMesh.text = "";
-            else textMesh.text = value.ToString();
+            else textMesh.text = (value / decrementRate).ToString();
         }
     }
     private Tile parentTile;
@@ -113,6 +113,7 @@ public class Building : MonoBehaviour {
         sr.color = player.color;
         claimAmountLeft = initialClaimAmountLeft;
         player.claimedBuildings.Add(this);
+        Services.UIManager.UpdateTowerUI();
         foreach(Worker worker in player.workers) worker.GetTempBonuses(statBonuses);
         Services.main.CheckForWin(player);
     }
@@ -120,6 +121,7 @@ public class Building : MonoBehaviour {
     void LoseControl()
     {
         controller.claimedBuildings.Remove(this);
+        Services.UIManager.UpdateTowerUI();
         foreach (Worker worker in controller.workers) worker.LoseTempBonuses(statBonuses);
     }
 
@@ -135,20 +137,20 @@ public class Building : MonoBehaviour {
         if (claimAmountLeft > 0)
         {
             claimAmountLeft -= decrementRate;
-            IncrementInfluence(controller.playerNum - 1);
-            if (playerInfluence[controller.playerNum - 1] >= permanentControlThreshold)
-            {
-                GainPermanentControl();
-            }
-            else if (claimAmountLeft == 0) ReturnToNeutral();
+            if (claimAmountLeft == 0 && !permanentlyControlled) ReturnToNeutral();
         }
     }
     
-    void IncrementInfluence(int playerIndex)
+    public void IncrementInfluence()
     {
+        int playerIndex = controller.playerNum - 1;
         playerInfluence[playerIndex] += 1;
         influenceBars[playerIndex].transform.GetChild(0).localScale =
             new Vector3(1, playerInfluence[playerIndex] / (float)permanentControlThreshold, 1);
+        if (playerInfluence[controller.playerNum - 1] >= permanentControlThreshold)
+        {
+            GainPermanentControl();
+        }
     }
 
     void GainPermanentControl()
@@ -201,7 +203,7 @@ public class Building : MonoBehaviour {
 
         if (newPotentialClaimAmounLeftCounter != 0)
         {
-            textMesh.text = newPotentialClaimAmounLeftCounter.ToString();
+            textMesh.text = (newPotentialClaimAmounLeftCounter / decrementRate).ToString();
         }
         else
         {

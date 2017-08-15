@@ -59,4 +59,8 @@ public class PrefabDB : ScriptableObject {
     [SerializeField]
     private GameObject roundMarker;
     public GameObject RoundMarker { get { return roundMarker; } }
+
+    [SerializeField]
+    private GameObject towerTrackerElement;
+    public GameObject TowerTrackerElement { get { return towerTrackerElement; } }
 }

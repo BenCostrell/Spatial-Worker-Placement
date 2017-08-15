@@ -89,6 +89,7 @@ public class Main : Scene<TransitionData> {
         TaskTree roundEndTasks = new TaskTree(new EmptyTask());
         roundEndTasks
             .Then(new ScrollTurnBanner(null))
+            .Then(new ActionTask(AccumulateInfluenceOnBuildings))
             .Then(DecrementBuildings())
             .Then(IncrementResources())
             .Then(DecrementItemCosts())
@@ -174,6 +175,15 @@ public class Main : Scene<TransitionData> {
                 new DecrementItem(Services.MapManager.itemTiles[i].containedItem));
         }
         return decrementEachItem;
+    }
+
+    void AccumulateInfluenceOnBuildings()
+    {
+        foreach(Tile tile in Services.MapManager.buildingTiles)
+        {
+            if (tile.containedBuilding.controller != null)
+                tile.containedBuilding.IncrementInfluence();
+        }
     }
 
     TaskTree DecrementBuildings()
