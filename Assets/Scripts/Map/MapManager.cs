@@ -46,6 +46,9 @@ public class MapManager : MonoBehaviour {
     private int minDistZoneToZone;
     public Sprite defaultTileSprite;
 
+    [SerializeField]
+    private int towerStatValue;
+
     public List<Zone> currentActiveZones { get; private set; }
     public List<Tile> resourceTiles { get; private set; }
     public List<Tile> itemTiles { get; private set; }
@@ -321,7 +324,7 @@ public class MapManager : MonoBehaviour {
         Dictionary<Item.StatType, int> statBonuses = new Dictionary<Item.StatType, int>();
         ItemStatInfo statInfo = Services.ItemConfig.GetItemStatConfig(statType);
         statBonuses[statType] = Mathf.Max(
-            ((40 / statInfo.Cost) / statInfo.RoundToNearest) * statInfo.RoundToNearest,
+            ((towerStatValue / statInfo.Cost) / statInfo.RoundToNearest) * statInfo.RoundToNearest,
             statInfo.RoundToNearest);
         building.Init(tile, statBonuses);
         tile.containedBuilding = building;

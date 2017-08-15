@@ -50,7 +50,7 @@ public class Worker : MonoBehaviour {
     private List<Item> items;
     private Dictionary<Item.StatType, int> bonuses;
     private Dictionary<Item.StatType, int> tempBonuses;
-
+    private ParticleSystem availableActionsParticleSystem;
 
     [HideInInspector]
     public bool movedThisRound;
@@ -70,6 +70,7 @@ public class Worker : MonoBehaviour {
         taskManager = new TaskManager();
         sr = GetComponent<SpriteRenderer>();
         lr = GetComponentInChildren<LineRenderer>();
+        availableActionsParticleSystem = GetComponentInChildren<ParticleSystem>();
         resourceHudText = GetComponentInChildren<TextMesh>();
         resourceHudText.gameObject.GetComponent<Renderer>().sortingOrder = 7;
         arrowHead = lr.gameObject;
@@ -95,7 +96,26 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         taskManager.Update();
+        ManageHighlight();
 	}
+
+    void ManageHighlight()
+    {
+        if (!Services.main.turnEnding &&
+            Services.main.currentActivePlayer == parentPlayer &&
+            AnyAvailableActions() &&
+            (parentPlayer.workerMovedThisTurn == this || 
+                parentPlayer.workerMovedThisTurn == null))
+        {
+            if (!availableActionsParticleSystem.isPlaying)
+                availableActionsParticleSystem.Play();
+        }
+        else if (availableActionsParticleSystem.isPlaying)
+        {
+            availableActionsParticleSystem.Stop();
+            availableActionsParticleSystem.Clear();
+        }
+    }
 
     public void PlaceOnTile(Tile tile)
     {

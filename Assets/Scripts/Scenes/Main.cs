@@ -18,7 +18,7 @@ public class Main : Scene<TransitionData> {
     public TaskManager taskManager { get; private set; }
     [HideInInspector]
     public Camera mainCamera { get; private set; }
-    private bool turnEnding;
+    public bool turnEnding { get; private set; }
     public bool gameOver { get; private set; }
     public int activeAnimations;
 
