@@ -155,6 +155,7 @@ public class MapManager : MonoBehaviour {
     {
         Zone.ZoneType type = GenerateRandomZoneType();
         Tile location = GenerateValidZoneTile(minRadius, minDist, minZoneDist);
+        if (location == null) return null;
         Zone zone;
         switch (type)
         {
@@ -178,6 +179,23 @@ public class MapManager : MonoBehaviour {
     {
         ZoneTypeInfo randomTypeInfo =
             Services.ZoneConfig.Zones[Random.Range(0, Services.ZoneConfig.Zones.Length)];
+        bool valid;
+        for (int i = 0; i < maxTriesProcGen; i++)
+        {
+            randomTypeInfo =
+                Services.ZoneConfig.Zones[Random.Range(0, Services.ZoneConfig.Zones.Length)];
+            valid = true;
+            for (int j = 0; j < currentActiveZones.Count; j++)
+            {
+                if (currentActiveZones[j].type == randomTypeInfo.Type)
+                {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) break;
+        }
+        
         return randomTypeInfo.Type;
     }
 

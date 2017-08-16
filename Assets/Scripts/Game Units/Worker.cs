@@ -367,7 +367,7 @@ public class Worker : MonoBehaviour {
 
     int AdjustedItemCost(Item item)
     {
-        return Mathf.Max(1, item.cost - itemDiscount);
+        return Mathf.Max(Services.ItemConfig.DiscountDecrementRate, item.cost - itemDiscount);
     }
 
     public void AcquireItem(Item item)

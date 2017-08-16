@@ -72,7 +72,7 @@ public class Item
 
     public void DecrementCost()
     {
-        cost -= Services.ItemConfig.DiscountDecrement;
+        cost -= Services.ItemConfig.DiscountDecrementRate;
         if (cost <= 0) MakeInaccessibleAndDestroy();
     }
 

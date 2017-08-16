@@ -33,8 +33,8 @@ public class Building : MonoBehaviour {
         private set
         {
             claimAmountLeft_ = value;
-            if (value == 0) textMesh.text = "";
-            else textMesh.text = (value / decrementRate).ToString();
+            if (claimAmountLeft_ == 0) textMesh.text = "";
+            else textMesh.text = (claimAmountLeft_ / decrementRate).ToString();
         }
     }
     private Tile parentTile;

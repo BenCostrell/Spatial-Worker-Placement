@@ -10,7 +10,7 @@ public abstract class Zone
     protected int expansionLevel;
     protected readonly Tile centerTile;
     public enum ZoneType { ResourceDrain, TowerDepreciate, MovementSlow }
-    protected ZoneType type;
+    public ZoneType type { get; protected set; }
     protected ZoneTypeInfo zoneTypeInfo;
     public Sprite sprite { get; protected set; }
     public bool tooltipActive { get; private set; }
@@ -48,7 +48,9 @@ public abstract class Zone
             {
                 foreach (Tile neighbor in tile.neighbors)
                 {
-                    if (!currentTiles.Contains(neighbor) && !newlyAddedTiles.Contains(neighbor))
+                    if (!currentTiles.Contains(neighbor) && 
+                        !newlyAddedTiles.Contains(neighbor) &&
+                        (neighbor.zone == null || controller != null))
                     {
                         fullExpandTaskTree.Then(new TileEnterZone(neighbor, this));
                         newlyAddedTiles.Add(neighbor);
