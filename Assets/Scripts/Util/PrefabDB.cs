@@ -49,10 +49,18 @@ public class PrefabDB : ScriptableObject {
     public GameObject BuildingTooltip { get { return buildingTooltip; } }
 
     [SerializeField]
+    private GameObject zoneTooltip;
+    public GameObject ZoneTooltip { get { return zoneTooltip; } }
+
+    [SerializeField]
     private GameObject turnMarker;
     public GameObject TurnMarker { get { return turnMarker; } }
 
     [SerializeField]
     private GameObject roundMarker;
     public GameObject RoundMarker { get { return roundMarker; } }
+
+    [SerializeField]
+    private GameObject towerTrackerElement;
+    public GameObject TowerTrackerElement { get { return towerTrackerElement; } }
 }

@@ -27,48 +27,80 @@ public class Item
     }
     public bool destroyed { get; private set; }
     public bool hoverInfoActive { get; private set; }
+    private static int nextId_;
+    private static int nextId
+    {
+        get
+        {
+            nextId_ += 1;
+            return nextId_;
+        }
+    }
+    public int id { get; private set; }
+    public Vector3 basePosition { get; private set; }
 
     public Item(Dictionary<StatType, int> statBonuses_, Tile tile)
     {
         statBonuses = statBonuses_;
+        id = nextId;
         obj = GameObject.Instantiate(Services.Prefabs.Item, Services.SceneStackManager.CurrentScene.transform);
         obj.transform.position = tile.hex.ScreenPos() + Services.ItemConfig.Offset;
+        basePosition = obj.transform.position;
         parentTile = tile;
         costText = obj.GetComponentInChildren<TextMesh>();
         costText.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         defaultTextColor = costText.color;
-        cost = Services.ItemConfig.GetValue(statBonuses) 
+        cost = ((Services.ItemConfig.GetValue(statBonuses)/Services.MapManager.resourceAmtIncrement) 
+            * Services.MapManager.resourceAmtIncrement)
             + Services.ItemConfig.StartingPriceBump;
         obj.SetActive(false);
         ItemStatInfo config = Services.ItemConfig.GetItemStatConfig(statBonuses.First().Key);
         obj.GetComponent<SpriteRenderer>().sprite = config.Sprite;
-        Services.main.taskManager.AddTask(new ItemSpawnAnimation(this));
+        Services.main.taskManager.AddTask(new TaskQueue(new List<Task>() {
+            new ItemSpawnAnimation(this),
+            new FloatItem(this)}));
     }
 
-    public void GetAcquired()
+    public void GetAcquired(Worker worker)
     {
-        DestroyThis();
+        TaskQueue acquisitionTasks = new TaskQueue();
+        MakeInaccessible();
+        acquisitionTasks.Add(new GetItemAnimation(this, worker));
+        acquisitionTasks.Add(new ActionTask(DestroyThis));
+        Services.main.taskManager.AddTask(acquisitionTasks);
     }
 
     public void DecrementCost()
     {
-        cost -= 1;
-        if (cost <= 0) DestroyThis();
+        cost -= Services.ItemConfig.DiscountDecrementRate;
+        if (cost <= 0) MakeInaccessibleAndDestroy();
     }
 
     void DestroyThis()
     {
         GameObject.Destroy(obj);
+    }
+
+    void MakeInaccessible()
+    {
         Services.MapManager.itemTiles.Remove(parentTile);
         parentTile.containedItem = null;
         parentTile = null;
         destroyed = true;
     }
 
+    void MakeInaccessibleAndDestroy()
+    {
+        MakeInaccessible();
+        DestroyThis();
+    }
+
     public void ShowPotentialPurchasePrice(Worker worker)
     {
-        costText.text = Mathf.Max(1, cost - worker.itemDiscount).ToString();
-        costText.color = Color.cyan;
+        int price = Mathf.Max(1, cost - worker.itemDiscount);
+        if (price <= worker.resourcesInHand) costText.color = Color.cyan;
+        else costText.color = Color.red / 2 + Color.black / 2;
+        costText.text = price.ToString();
         hoverInfoActive = true;
     }
 

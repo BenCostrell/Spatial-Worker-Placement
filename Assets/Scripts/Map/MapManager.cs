@@ -5,28 +5,49 @@ using System.Linq;
 
 public class MapManager : MonoBehaviour {
 
-    public int radius;
-    public int resourceTilesMin;
-    public int resourceTilesMax;
-    public int resourceAmtMin;
-    public int resourceAmtMax;
-    public int maxTriesProcGen;
-    public int minDistResourceTiles;
-    public int minRadiusResourceTiles;
+    [SerializeField]
+    private int radius;
+    [SerializeField]
+    private int resourceTilesMin;
+    [SerializeField]
+    private int resourceTilesMax;
+    [SerializeField]
+    private int resourceAmtMin;
+    [SerializeField]
+    private int resourceAmtMax;
+    public int resourceAmtIncrement;
+    [SerializeField]
+    private int maxTriesProcGen;
+    [SerializeField]
+    private int minDistResourceTiles;
+    [SerializeField]
+    private int minRadiusResourceTiles;
 
-    public int minRadiusItems;
-    public int minDistItems;
-    public int numItems;
-    public int itemDistAntivariance;
-    public int approxMinStartingItemVal;
-    public int approxMaxStartingItemVal;
+    [SerializeField]
+    private int minRadiusItems;
+    [SerializeField]
+    private int minDistItems;
+    [SerializeField]
+    private int numItems;
+    [SerializeField]
+    private int itemDistAntivariance;
+    [SerializeField]
+    private int approxMinStartingItemVal;
+    [SerializeField]
+    private int approxMaxStartingItemVal;
 
-    public int numZones;
-    public int minRadiusZones;
-    public int minDistZones;
-    public int minDistZoneToZone;
-
+    [SerializeField]
+    private int numZones;
+    [SerializeField]
+    private int minRadiusZones;
+    [SerializeField]
+    private int minDistZones;
+    [SerializeField]
+    private int minDistZoneToZone;
     public Sprite defaultTileSprite;
+
+    [SerializeField]
+    private int towerStatValue;
 
     public List<Zone> currentActiveZones { get; private set; }
     public List<Tile> resourceTiles { get; private set; }
@@ -126,8 +147,7 @@ public class MapManager : MonoBehaviour {
         currentActiveZones = new List<Zone>();
         for (int i = 0; i < numZones; i++)
         {
-            currentActiveZones
-                .Add(GenerateZone(minRadiusZones, minDistZones, minDistZoneToZone));
+            GenerateZone(minRadiusZones, minDistZones, minDistZoneToZone);
         }
     }
 
@@ -135,23 +155,47 @@ public class MapManager : MonoBehaviour {
     {
         Zone.ZoneType type = GenerateRandomZoneType();
         Tile location = GenerateValidZoneTile(minRadius, minDist, minZoneDist);
+        if (location == null) return null;
+        Zone zone;
         switch (type)
         {
             case Zone.ZoneType.ResourceDrain:
-                return new ResourceDrainZone(location);
+                zone = new ResourceDrainZone(location);
+                break;
             case Zone.ZoneType.TowerDepreciate:
-                return new TowerDepreciateZone(location);
+                zone = new TowerDepreciateZone(location);
+                break;
             case Zone.ZoneType.MovementSlow:
-                return new MovementSlowZone(location);
+                zone = new MovementSlowZone(location);
+                break;
             default:
                 return null;
         }
+        currentActiveZones.Add(zone);
+        return zone;
     }
 
     Zone.ZoneType GenerateRandomZoneType()
     {
         ZoneTypeInfo randomTypeInfo =
             Services.ZoneConfig.Zones[Random.Range(0, Services.ZoneConfig.Zones.Length)];
+        bool valid;
+        for (int i = 0; i < maxTriesProcGen; i++)
+        {
+            randomTypeInfo =
+                Services.ZoneConfig.Zones[Random.Range(0, Services.ZoneConfig.Zones.Length)];
+            valid = true;
+            for (int j = 0; j < currentActiveZones.Count; j++)
+            {
+                if (currentActiveZones[j].type == randomTypeInfo.Type)
+                {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) break;
+        }
+        
         return randomTypeInfo.Type;
     }
 
@@ -202,7 +246,10 @@ public class MapManager : MonoBehaviour {
         {
             Resource resource = Instantiate(Services.Prefabs.Resource,
                     Services.SceneStackManager.CurrentScene.transform).GetComponent<Resource>();
-            int resourceValue = Random.Range(minVal, maxVal + 1);
+            int minNumIncrements = minVal / resourceAmtIncrement;
+            int maxNumIncrements = maxVal / resourceAmtIncrement;
+            int resourceValue = 
+                Random.Range(minNumIncrements, maxNumIncrements + 1) * resourceAmtIncrement;
             resource.Init(resourceValue, tile);
             tile.containedResource = resource;
             resourceTiles.Add(tile);
@@ -245,22 +292,23 @@ public class MapManager : MonoBehaviour {
     {
         Dictionary<Item.StatType, int> bonuses = new Dictionary<Item.StatType, int>();
         int targetValue = Distribution(approxMinVal, approxMaxVal, itemDistAntivariance);
-        int cost = 0;
-        while(cost < targetValue)
-        {
-            if (!bonuses.ContainsKey(statType)) bonuses[statType] = 1;
-            else bonuses[statType] += 1;
-            cost += Services.ItemConfig.GetItemStatConfig(statType).Cost;
-        }
+        ItemStatInfo statInfo = Services.ItemConfig.GetItemStatConfig(statType);
+        int statCost = statInfo.Cost;
+        int bonus = Mathf.Max(((targetValue / statCost) / statInfo.RoundToNearest) 
+            * statInfo.RoundToNearest, statInfo.RoundToNearest);
+        bonuses[statType] = bonus;
         return new Item(bonuses, tile);
     }
 
     int Distribution(int min, int max, int antivariance)
     {
         int result = 0;
+        int minNumIncrements = min / resourceAmtIncrement;
+        int maxNumIncrements = max / resourceAmtIncrement;
         for (int i = 0; i < antivariance; i++)
         {
-            result += Random.Range(min, max + 1);
+            result += 
+                Random.Range(minNumIncrements, maxNumIncrements + 1) * resourceAmtIncrement;
         }
         result = result / antivariance;
         return result;
@@ -292,7 +340,10 @@ public class MapManager : MonoBehaviour {
             Services.SceneStackManager.CurrentScene.transform).GetComponent<Building>();
         Tile tile = map[coord];
         Dictionary<Item.StatType, int> statBonuses = new Dictionary<Item.StatType, int>();
-        statBonuses[statType] = 6 / Services.ItemConfig.GetItemStatConfig(statType).Cost;
+        ItemStatInfo statInfo = Services.ItemConfig.GetItemStatConfig(statType);
+        statBonuses[statType] = Mathf.Max(
+            ((towerStatValue / statInfo.Cost) / statInfo.RoundToNearest) * statInfo.RoundToNearest,
+            statInfo.RoundToNearest);
         building.Init(tile, statBonuses);
         tile.containedBuilding = building;
         Services.main.buildings.Add(building);

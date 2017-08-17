@@ -13,6 +13,18 @@ public class ZoneConfig : ScriptableObject
     private float colorTintProportion;
     public float ColorTintProportion { get { return colorTintProportion; } }
 
+    [SerializeField]
+    private Color tooltipColor;
+    public Color TooltipColor { get { return tooltipColor; } }
+
+    [SerializeField]
+    private float expandTime;
+    public float ExpandTime { get { return expandTime; } }
+
+    [SerializeField]
+    private int expansionRate;
+    public int ExpansionRate { get { return expansionRate; } }
+
     public ZoneTypeInfo GetZoneTypeInfo(Zone.ZoneType zoneType)
     {
         foreach (ZoneTypeInfo zoneTypeInfo in zones)

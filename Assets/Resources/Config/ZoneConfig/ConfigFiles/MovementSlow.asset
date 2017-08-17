@@ -14,3 +14,4 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: fbd3cbe113cd74a45978cbc240d1154e, type: 3}
   label: Movement Slow
   type: 2
+  effectMagnitude: 2

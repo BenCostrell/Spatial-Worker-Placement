@@ -19,4 +19,8 @@ public class ItemStatInfo : ScriptableObject
     [SerializeField]
     private string label;
     public string Label { get { return label; } }
+
+    [SerializeField]
+    private int roundToNearest;
+    public int RoundToNearest { get { return roundToNearest; } }
 }

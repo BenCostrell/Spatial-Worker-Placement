@@ -22,6 +22,10 @@ public class ItemConfig : ScriptableObject
     public int StartingPriceBump { get { return startingPriceBump; } }
 
     [SerializeField]
+    private int discountDecrementRate;
+    public int DiscountDecrementRate { get { return discountDecrementRate; } }
+
+    [SerializeField]
     private float decrementAnimTime;
     public float DecrementAnimTime { get { return decrementAnimTime; } }
 
@@ -40,6 +44,30 @@ public class ItemConfig : ScriptableObject
     [SerializeField]
     private Color tooltipColor;
     public Color TooltipColor { get { return tooltipColor; } }
+
+    [SerializeField]
+    private float acquireAnimTime;
+    public float AcquireAnimTime { get { return acquireAnimTime; } }
+
+    [SerializeField]
+    private Vector3 acquireOffset;
+    public Vector3 AcquireOffset { get { return acquireOffset; } }
+
+    [SerializeField]
+    private float floatNoiseMag;
+    public float FloatNoiseMag { get { return floatNoiseMag; } }
+
+    [SerializeField]
+    private float floatNoiseSpeed;
+    public float FloatNoiseSpeed { get { return floatNoiseSpeed; } }
+
+    [SerializeField]
+    private float floatCycleDist;
+    public float FloatCycleDist { get { return floatCycleDist; } }
+
+    [SerializeField]
+    private float floatCyclePeriod;
+    public float FloatCyclePeriod { get { return floatCyclePeriod; } }
 
     public ItemStatInfo GetItemStatConfig(Item.StatType statType)
     {

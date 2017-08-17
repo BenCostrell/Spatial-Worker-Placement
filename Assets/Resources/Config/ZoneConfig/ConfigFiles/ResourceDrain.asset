@@ -14,3 +14,4 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: fbf422e3fde244a158b213a016b5534c, type: 3}
   label: Resource Drain
   type: 0
+  effectMagnitude: 5

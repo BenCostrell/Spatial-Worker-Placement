@@ -7,29 +7,34 @@ using UnityEngine.UI;
 public class Building : MonoBehaviour {
 
     public Color defaultColor;
-    public Vector2 offset;
+    [SerializeField]
+    private Vector2 offset;
     private GameObject tooltip;
-    public Color tooltipColor;
+    [SerializeField]
+    private Color tooltipColor;
     private SpriteRenderer sr;
     private TextMesh textMesh;
     private Color defaultTextColor;
     public Player controller { get; private set; }
+    public int decrementRate;
     public bool permanentlyControlled { get; private set; }
-    public int permanentControlThreshold;
-    public float permanentControlScaleIncrease;
+    [SerializeField]
+    private int permanentControlThreshold;
+    [SerializeField]
+    private float permanentControlScaleIncrease;
     public float decrementAnimTime;
     public float decrementAnimScale;
     private List<int> playerInfluence;
     private List<GameObject> influenceBars;
-    private int turnsLeft_;
-    public int turnsLeft
+    private int claimAmountLeft_;
+    public int claimAmountLeft
     {
-        get { return turnsLeft_; }
+        get { return claimAmountLeft_; }
         private set
         {
-            turnsLeft_ = value;
-            if (value == 0) textMesh.text = "";
-            else textMesh.text = value.ToString();
+            claimAmountLeft_ = value;
+            if (claimAmountLeft_ == 0) textMesh.text = "";
+            else textMesh.text = (claimAmountLeft_ / decrementRate).ToString();
         }
     }
     private Tile parentTile;
@@ -45,7 +50,7 @@ public class Building : MonoBehaviour {
         textMesh.gameObject.GetComponent<Renderer>().sortingOrder = 4;
         defaultTextColor = textMesh.color;
         sr.color = defaultColor;
-        turnsLeft = 0;
+        claimAmountLeft = 0;
         permanentlyControlled = false;
         parentTile = tile;
         transform.position = tile.hex.ScreenPos() + offset;
@@ -83,38 +88,40 @@ public class Building : MonoBehaviour {
             }
             else if (controller == player)
             {
-                turnsLeft += claimAmount;
+                claimAmountLeft += claimAmount;
             }
-            else if (claimAmount < turnsLeft)
+            else if (claimAmount < claimAmountLeft)
             {
-                turnsLeft -= claimAmount;
+                claimAmountLeft -= claimAmount;
             }
-            else if (claimAmount > turnsLeft)
+            else if (claimAmount > claimAmountLeft)
             {
-                SuccessfulClaim(player, claimAmount - turnsLeft);
+                SuccessfulClaim(player, claimAmount - claimAmountLeft);
             }
             else
             {
                 ReturnToNeutral();
-                turnsLeft = 0;
+                claimAmountLeft = 0;
             }
         }
     }
 
-    void SuccessfulClaim(Player player, int initialTurnsLeft)
+    void SuccessfulClaim(Player player, int initialClaimAmountLeft)
     {
         if (controller != null) LoseControl();
         controller = player;
         sr.color = player.color;
-        turnsLeft = initialTurnsLeft;
+        claimAmountLeft = initialClaimAmountLeft;
         player.claimedBuildings.Add(this);
+        Services.UIManager.UpdateTowerUI();
         foreach(Worker worker in player.workers) worker.GetTempBonuses(statBonuses);
-        Services.main.CheckForWin();
+        Services.main.CheckForWin(player);
     }
 
     void LoseControl()
     {
         controller.claimedBuildings.Remove(this);
+        Services.UIManager.UpdateTowerUI();
         foreach (Worker worker in controller.workers) worker.LoseTempBonuses(statBonuses);
     }
 
@@ -127,29 +134,29 @@ public class Building : MonoBehaviour {
 
     public void Decrement()
     {
-        if (turnsLeft > 0)
+        if (claimAmountLeft > 0)
         {
-            turnsLeft -= 1;
-            IncrementInfluence(controller.playerNum - 1);
-            if (playerInfluence[controller.playerNum - 1] >= permanentControlThreshold)
-            {
-                GainPermanentControl();
-            }
-            else if (turnsLeft == 0) ReturnToNeutral();
+            claimAmountLeft -= decrementRate;
+            if (claimAmountLeft == 0 && !permanentlyControlled) ReturnToNeutral();
         }
     }
     
-    void IncrementInfluence(int playerIndex)
+    public void IncrementInfluence()
     {
+        int playerIndex = controller.playerNum - 1;
         playerInfluence[playerIndex] += 1;
         influenceBars[playerIndex].transform.GetChild(0).localScale =
             new Vector3(1, playerInfluence[playerIndex] / (float)permanentControlThreshold, 1);
+        if (playerInfluence[controller.playerNum - 1] >= permanentControlThreshold)
+        {
+            GainPermanentControl();
+        }
     }
 
     void GainPermanentControl()
     {
         permanentlyControlled = true;
-        turnsLeft = 0;
+        claimAmountLeft = 0;
         transform.localScale *= permanentControlScaleIncrease;
         foreach(GameObject bar in influenceBars)
         {
@@ -160,36 +167,43 @@ public class Building : MonoBehaviour {
     public void ShowPotentialClaim(Worker worker)
     {
         hoverInfoActive = true;
-        int claimAmount = worker.resourcesInHand + worker.bonusClaimPower;
-        textMesh.color = Color.cyan;
-        int newPotentialTurnsLeftCounter;
-        if (controller == null && claimAmount > 0)
+        int claimAmount;
+        if (worker.resourcesInHand >= decrementRate)
         {
-            newPotentialTurnsLeftCounter = claimAmount;
+            claimAmount = ((worker.resourcesInHand + worker.bonusClaimPower) / decrementRate)
+                * decrementRate;
+        }
+        else claimAmount = 0;
+
+        textMesh.color = Color.cyan;
+        int newPotentialClaimAmounLeftCounter;
+        if (controller == null && claimAmount >= decrementRate)
+        {
+            newPotentialClaimAmounLeftCounter = claimAmount;
             sr.color = worker.parentPlayer.color;
         }
         else if (controller == worker.parentPlayer)
         {
-            newPotentialTurnsLeftCounter = turnsLeft + claimAmount;
+            newPotentialClaimAmounLeftCounter = claimAmountLeft + claimAmount;
         }
-        else if (claimAmount > turnsLeft)
+        else if (claimAmount > claimAmountLeft)
         {
-            newPotentialTurnsLeftCounter = claimAmount - turnsLeft;
+            newPotentialClaimAmounLeftCounter = claimAmount - claimAmountLeft;
             sr.color = worker.parentPlayer.color;
         }
-        else if (claimAmount < turnsLeft)
+        else if (claimAmount < claimAmountLeft)
         {
-            newPotentialTurnsLeftCounter = turnsLeft - claimAmount;
+            newPotentialClaimAmounLeftCounter = claimAmountLeft - claimAmount;
         }
         else
         {
-            newPotentialTurnsLeftCounter = 0;
+            newPotentialClaimAmounLeftCounter = 0;
             sr.color = Color.white;
         }
 
-        if (newPotentialTurnsLeftCounter != 0)
+        if (newPotentialClaimAmounLeftCounter != 0)
         {
-            textMesh.text = newPotentialTurnsLeftCounter.ToString();
+            textMesh.text = (newPotentialClaimAmounLeftCounter / decrementRate).ToString();
         }
         else
         {
@@ -200,9 +214,9 @@ public class Building : MonoBehaviour {
     public void ResetDisplay()
     {
         hoverInfoActive = false;
-        if (turnsLeft != 0)
+        if (claimAmountLeft != 0)
         {
-            textMesh.text = turnsLeft.ToString();
+            textMesh.text = claimAmountLeft.ToString();
         }
         else
         {

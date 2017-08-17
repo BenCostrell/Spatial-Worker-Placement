@@ -8,10 +8,12 @@ public class GetResourceAnimation : Task
     private Resource resource;
     private Vector3 baseScale;
     private Vector3 initialPos;
+    private Worker worker;
 
-    public GetResourceAnimation(Resource resource_)
+    public GetResourceAnimation(Resource resource_, Worker worker_)
     {
         resource = resource_;
+        worker = worker_;
     }
 
     protected override void Init()
@@ -21,6 +23,7 @@ public class GetResourceAnimation : Task
         baseScale = resource.transform.localScale;
         initialPos = resource.transform.position;
         resource.animating = true;
+        Services.main.activeAnimations += 1;
     }
 
     internal override void Update()
@@ -50,5 +53,6 @@ public class GetResourceAnimation : Task
     protected override void OnSuccess()
     {
         resource.animating = false;
+        Services.main.activeAnimations -= 1;
     }
 }

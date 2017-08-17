@@ -14,3 +14,4 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 4daceb60f579b5d4b937773840451a4c, type: 3}
   label: Tower Depreciate
   type: 1
+  effectMagnitude: 1

@@ -50,7 +50,7 @@ public class Worker : MonoBehaviour {
     private List<Item> items;
     private Dictionary<Item.StatType, int> bonuses;
     private Dictionary<Item.StatType, int> tempBonuses;
-
+    private ParticleSystem availableActionsParticleSystem;
 
     [HideInInspector]
     public bool movedThisRound;
@@ -59,7 +59,7 @@ public class Worker : MonoBehaviour {
     [HideInInspector]
     public Hex lastDirectionMoved;
     [HideInInspector]
-    public bool midAnimation;
+    public int activeAnimations;
     [HideInInspector]
     public int mostRecentResourceAcquisition;
 
@@ -70,6 +70,7 @@ public class Worker : MonoBehaviour {
         taskManager = new TaskManager();
         sr = GetComponent<SpriteRenderer>();
         lr = GetComponentInChildren<LineRenderer>();
+        availableActionsParticleSystem = GetComponentInChildren<ParticleSystem>();
         resourceHudText = GetComponentInChildren<TextMesh>();
         resourceHudText.gameObject.GetComponent<Renderer>().sortingOrder = 7;
         arrowHead = lr.gameObject;
@@ -83,6 +84,7 @@ public class Worker : MonoBehaviour {
         itemDiscount = 0;
         bonusClaimPower = 0;
         zoneExpandPower = 1;
+        activeAnimations = 0;
         bumpPower = defaultBumpPower;
         items = new List<Item>();
         availableGoals = new List<Tile>();
@@ -94,7 +96,26 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         taskManager.Update();
+        ManageHighlight();
 	}
+
+    void ManageHighlight()
+    {
+        if (!Services.main.turnEnding &&
+            Services.main.currentActivePlayer == parentPlayer &&
+            AnyAvailableActions() &&
+            (parentPlayer.workerMovedThisTurn == this || 
+                parentPlayer.workerMovedThisTurn == null))
+        {
+            if (!availableActionsParticleSystem.isPlaying)
+                availableActionsParticleSystem.Play();
+        }
+        else if (availableActionsParticleSystem.isPlaying)
+        {
+            availableActionsParticleSystem.Stop();
+            availableActionsParticleSystem.Clear();
+        }
+    }
 
     public void PlaceOnTile(Tile tile)
     {
@@ -111,7 +132,7 @@ public class Worker : MonoBehaviour {
 
     void AnimateMovementAlongPath(List<Tile> path, bool forcedMovement)
     {
-        midAnimation = true;
+        Services.main.activeAnimations += 1;
         TaskQueue movementTasks = new TaskQueue();
 
         for (int i = path.Count - 1; i >= 0; i--)
@@ -130,14 +151,14 @@ public class Worker : MonoBehaviour {
     void InitiateMovement(List<Tile> path)
     {
         parentPlayer.workerMovedThisTurn = this;
-        movesRemaining -= path.Count;
+        movesRemaining -= PathCost(path);
         AnimateMovementAlongPath(path, false);
     }
 
     public bool TryToMove(Tile goal)
     {
-        List<Tile> path = AStarSearch.ShortestPath(currentTile, goal);
-        if (CanMoveAlongPath(path) && path.Count > 0) {
+        List<Tile> path = AStarSearch.ShortestPath(currentTile, goal, parentPlayer, false);
+        if (path.Count > 0 && CanMoveAlongPath(path)) {
             InitiateMovement(path);
             return true;
         }
@@ -146,7 +167,15 @@ public class Worker : MonoBehaviour {
 
     public bool CanMoveAlongPath(List<Tile> path)
     {
-        return (path.Count <= movesRemaining);
+        return (PathCost(path) <= movesRemaining);
+    }
+
+    int PathCost(List<Tile> path)
+    {
+        int totalMovementCost = 0;
+        foreach (Tile tile in path)
+            totalMovementCost += tile.movementCostPerPlayer[parentPlayer.playerNum - 1];
+        return totalMovementCost;
     }
 
     void EndForcedMovement()
@@ -161,7 +190,7 @@ public class Worker : MonoBehaviour {
 
     void EndMovement(bool forcedMovement)
     {
-        midAnimation = false;
+        Services.main.activeAnimations -= 1;
         if (currentTile.containedResource != null && resourcesInHand < carryingCapacity)
         {
             ClaimResources(currentTile.containedResource);
@@ -180,6 +209,10 @@ public class Worker : MonoBehaviour {
             currentTile.zone.GetClaimed(this);
         }
         Services.UIManager.selector.ShowAppropriateTooltip();
+        if (Services.main.gameOver)
+        {
+            return;
+        }
         if (!AnyAvailableActions() && !forcedMovement) Services.main.EndTurn();
         if (AnyAvailableActions() && !forcedMovement) Services.UIManager.selector.SelectWorker(this);
     }
@@ -302,7 +335,8 @@ public class Worker : MonoBehaviour {
         }
         else
         {
-            otherWorker.AnimateMovementAlongPath(AStarSearch.ShortestPath(otherWorker.currentTile, targetTile), 
+            otherWorker.AnimateMovementAlongPath(
+                AStarSearch.ShortestPath(otherWorker.currentTile, targetTile, parentPlayer, true), 
                 true);
         }
 
@@ -333,12 +367,12 @@ public class Worker : MonoBehaviour {
 
     int AdjustedItemCost(Item item)
     {
-        return Mathf.Max(1, item.cost - itemDiscount);
+        return Mathf.Max(Services.ItemConfig.DiscountDecrementRate, item.cost - itemDiscount);
     }
 
     public void AcquireItem(Item item)
     {
-        item.GetAcquired();
+        item.GetAcquired(this);
         resourcesInHand -= AdjustedItemCost(item);
         items.Add(item);
         foreach (KeyValuePair<Item.StatType, int> entry in item.statBonuses)
@@ -378,10 +412,13 @@ public class Worker : MonoBehaviour {
 
     public void ClaimBuilding(Building building)
     {
-        if (resourcesInHand > 0)
+        if (resourcesInHand >= building.decrementRate)
         {
-            building.GetClaimed(parentPlayer, resourcesInHand + bonusClaimPower);
-            resourcesInHand = 0;
+            int claimAmount = ((resourcesInHand + bonusClaimPower) / building.decrementRate)
+                * building.decrementRate;
+            building.GetClaimed(parentPlayer, claimAmount);
+            resourcesInHand -= (resourcesInHand / building.decrementRate) 
+                * building.decrementRate;
         }
     }
 
@@ -415,7 +452,8 @@ public class Worker : MonoBehaviour {
     void HighlightAvailableMoves()
     {
         ClearAvailableMoves();
-        availableGoals = AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining);
+        availableGoals = 
+            AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining, parentPlayer, false);
         if (availableGoals.Count > 0)
         {
             //foreach (Tile tile in availableGoals)
@@ -483,7 +521,9 @@ public class Worker : MonoBehaviour {
 
     bool AnyAvailableActions()
     {
-        return movesRemaining > 0;
+        List<Tile> availableMoves = 
+            AStarSearch.FindAllAvailableGoals(currentTile, movesRemaining, parentPlayer, false);
+        return availableMoves.Count > 0;
     }
 
     public void DrainResources(int resourcesToDrain)

@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class Main : Scene<TransitionData> {
-
-
     [HideInInspector]
     public Player currentActivePlayer { get; private set; }
     [HideInInspector]
@@ -20,7 +18,9 @@ public class Main : Scene<TransitionData> {
     public TaskManager taskManager { get; private set; }
     [HideInInspector]
     public Camera mainCamera { get; private set; }
-    private bool turnEnding;
+    public bool turnEnding { get; private set; }
+    public bool gameOver { get; private set; }
+    public int activeAnimations;
 
     // Use this for initialization
     void Start () {
@@ -39,6 +39,7 @@ public class Main : Scene<TransitionData> {
         Services.MapManager.CreateHexGrid();
         PlaceInitialWorkers();
         roundNum = 0;
+        activeAnimations = 0;
         Services.UIManager.canvas = GetComponentInChildren<Canvas>().transform;
         mainCamera = GetComponentInChildren<Camera>();
         Services.UIManager.InitUI();
@@ -77,18 +78,24 @@ public class Main : Scene<TransitionData> {
         currentActivePlayer = Services.GameManager.players[(roundNum - 1) % Services.GameManager.numPlayers];
         foreach (Player player in Services.GameManager.players) player.Refresh();
         Services.UIManager.UpdateUI();
+        TaskTree roundStartTasks = new TaskTree(new WaitTask(0.5f));
+        roundStartTasks
+            .Then(new ScrollTurnBanner(currentActivePlayer));
+        taskManager.AddTask(roundStartTasks);
     }
 
     void EndRound()
     {
         TaskTree roundEndTasks = new TaskTree(new EmptyTask());
         roundEndTasks
+            .Then(new ScrollTurnBanner(null))
+            .Then(new ActionTask(AccumulateInfluenceOnBuildings))
             .Then(DecrementBuildings())
             .Then(IncrementResources())
             .Then(DecrementItemCosts())
-            .Then(new ActionTask(ApplyZoneEffects))
-            .Then(new ActionTask(IncrementZones))
-            .Then(new ActionTask(DecrementClaimedZones))
+            .Then(ApplyZoneEffects())
+            .Then(IncrementZones())
+            .Then(DecrementClaimedZones())
             .Then(new ActionTask(TempSpawnNewItems))
             .Then(new ActionTask(Services.MapManager.SpawnNewResources))
             .Then(new ActionTask(Services.MapManager.SpawnNewZones))
@@ -96,38 +103,46 @@ public class Main : Scene<TransitionData> {
         taskManager.AddTask(roundEndTasks);
     }
 
-    void IncrementZones()
+    TaskTree IncrementZones()
     {
+        TaskTree incrementAllZones = new TaskTree(new EmptyTask());
         if (Services.MapManager.currentActiveZones.Count > 0)
         {
             foreach (Zone zone in Services.MapManager.currentActiveZones)
             {
-                if (zone.controller == null) zone.Expand(1);
+                if (zone.controller == null)
+                    incrementAllZones.AddChild(zone.Expand(Services.ZoneConfig.ExpansionRate));
             }
         }
+        return incrementAllZones;
     }
 
-    void DecrementClaimedZones()
+    TaskTree DecrementClaimedZones()
     {
+        TaskTree decrementAllClaimedZones = new TaskTree(new EmptyTask());
         if (Services.MapManager.currentActiveZones.Count > 0)
         {
             for (int i = Services.MapManager.currentActiveZones.Count - 1; i >= 0; i--)
             {
                 Zone zone = Services.MapManager.currentActiveZones[i];
-                if (zone.controller != null) zone.Decrement();
+                if (zone.controller != null)
+                    decrementAllClaimedZones.AddChild(zone.Decrement());
             }
         }
+        return decrementAllClaimedZones;
     }
 
-    void ApplyZoneEffects()
+    TaskTree ApplyZoneEffects()
     {
+        TaskTree zoneEffects = new TaskTree(new EmptyTask());
         if (Services.MapManager.currentActiveZones.Count > 0)
         {
             foreach(Zone zone in Services.MapManager.currentActiveZones)
             {
-                if (zone.controller != null) zone.OnRoundEnd();
+                if (zone.controller != null) zoneEffects.AddChild(zone.OnRoundEnd());
             }
         }
+        return zoneEffects;
     }
 
     void TempSpawnNewItems()
@@ -162,13 +177,22 @@ public class Main : Scene<TransitionData> {
         return decrementEachItem;
     }
 
+    void AccumulateInfluenceOnBuildings()
+    {
+        foreach(Tile tile in Services.MapManager.buildingTiles)
+        {
+            if (tile.containedBuilding.controller != null)
+                tile.containedBuilding.IncrementInfluence();
+        }
+    }
+
     TaskTree DecrementBuildings()
     {
         TaskTree decrementEachBuilding = new TaskTree(new EmptyTask());
         foreach (Tile tile in Services.MapManager.buildingTiles)
         {
             if (!tile.containedBuilding.permanentlyControlled && 
-                tile.containedBuilding.turnsLeft > 0)
+                tile.containedBuilding.claimAmountLeft > 0)
             {
                 decrementEachBuilding.AddChild(new DecrementBuilding(tile.containedBuilding));
             }
@@ -180,9 +204,18 @@ public class Main : Scene<TransitionData> {
     {
         if (!turnEnding)
         {
-            WaitForAnimations waitForAnimations = new WaitForAnimations();
-            waitForAnimations.Then(new ActionTask(ActuallyEndTurn));
-            taskManager.AddTask(waitForAnimations);
+            currentActivePlayer.workerMovedThisTurn.EndTurn();
+            currentActivePlayer.workerMovedThisTurn = null;
+            Player nextPlayer = DetermineNextPlayer();
+            TaskQueue turnEndTasks = new TaskQueue();
+            turnEndTasks.Add(new EmptyTask());
+            turnEndTasks.Add(new WaitForAnimations());
+            if (nextPlayer != null)
+            {
+                turnEndTasks.Add(new ScrollTurnBanner(nextPlayer));
+            }
+            turnEndTasks.Add(new ActionTask(ActuallyEndTurn));
+            taskManager.AddTask(turnEndTasks);
             turnEnding = true;
         }
     }
@@ -190,8 +223,6 @@ public class Main : Scene<TransitionData> {
     void ActuallyEndTurn()
     {
         Services.UIManager.selector.Reset();
-        currentActivePlayer.workerMovedThisTurn.EndTurn();
-        currentActivePlayer.workerMovedThisTurn = null;
         Player nextPlayer = DetermineNextPlayer();
         if (nextPlayer == null) EndRound();
         else
@@ -238,19 +269,20 @@ public class Main : Scene<TransitionData> {
         }
     }
 
-    public void CheckForWin()
+    public void CheckForWin(Player player)
     {
-        foreach(Player player in Services.GameManager.players)
+        if (player.claimedBuildings.Count >= numBuildingClaimsToWin)
         {
-            if (player.claimedBuildings.Count >= numBuildingClaimsToWin)
-            {
-                GameWin(player);
-            }
+            GameWin(player);
         }
     }
 
     void GameWin(Player player)
     {
+        gameOver = true;
+        Services.UIManager.selector.gameObject.SetActive(false);
+        Services.UIManager.ShowWinMessage(player);
+
         Debug.Log("player " + player.playerNum + " has won");
     }
 }

@@ -22,6 +22,7 @@ public class Tile
     public SpriteRenderer sr { get; private set; }
     private GameObject border;
     public SpriteRenderer borderSr { get; private set; }
+    public int[] movementCostPerPlayer;
 
     public Tile(Hex hex_)
     {
@@ -35,10 +36,16 @@ public class Tile
         border = obj.transform.GetChild(0).gameObject;
         borderSr = border.GetComponent<SpriteRenderer>();
         border.SetActive(false);
+        movementCostPerPlayer = new int[Services.GameManager.numPlayers];
+        for (int i = 0; i < Services.GameManager.numPlayers; i++)
+        {
+            movementCostPerPlayer[i] = 1;
+        }
     }
 
     public void EnterZone(Zone zone_)
     {
+        if (zone != null) ExitZone();
         zone = zone_;
         zone.AddTile(this);
         sr.sprite = zone.sprite;

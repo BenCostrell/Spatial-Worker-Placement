@@ -11,14 +11,19 @@ public class TowerDepreciateZone : Zone
         centerTile.EnterZone(this);
     }
 
-    protected override void OnRoundEndForWorker(Worker worker)
+    protected override TaskTree OnRoundEndForWorker(Worker worker)
     {
-        if(worker.parentPlayer.claimedBuildings.Count > 0)
+        TaskTree roundEndTree = new TaskTree(new EmptyTask());
+        if (worker.parentPlayer.claimedBuildings.Count > 0)
         {
             foreach(Building building in worker.parentPlayer.claimedBuildings)
             {
-                building.Decrement();
+                for (int i = 0; i < zoneTypeInfo.EffectMagnitude; i++)
+                {
+                    roundEndTree.AddChild(new DecrementBuilding(building));
+                }
             }
         }
+        return roundEndTree;
     }
 }

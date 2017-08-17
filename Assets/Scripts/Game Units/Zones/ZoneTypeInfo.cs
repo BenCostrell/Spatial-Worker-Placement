@@ -15,4 +15,8 @@ public class ZoneTypeInfo : ScriptableObject
     [SerializeField]
     private Zone.ZoneType type;
     public Zone.ZoneType Type { get { return type; } }
+
+    [SerializeField]
+    private int effectMagnitude;
+    public int EffectMagnitude { get { return effectMagnitude; } }
 }
