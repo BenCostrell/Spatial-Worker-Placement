@@ -11,6 +11,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2fb74db18c6af438c0abff9de8f254, type: 3}
   m_Name: MovementSlow
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 4e4fca9b30970f14fb855a8afafde56b, type: 3}
+  sprite: {fileID: 21300000, guid: fbd3cbe113cd74a45978cbc240d1154e, type: 3}
   label: Movement Slow
   type: 2

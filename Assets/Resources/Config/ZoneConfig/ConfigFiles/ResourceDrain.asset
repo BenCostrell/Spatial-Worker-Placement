@@ -11,6 +11,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2fb74db18c6af438c0abff9de8f254, type: 3}
   m_Name: ResourceDrain
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: ba0fca395edafd84f9eaff41b52c7162, type: 3}
+  sprite: {fileID: 21300000, guid: fbf422e3fde244a158b213a016b5534c, type: 3}
   label: Resource Drain
   type: 0
