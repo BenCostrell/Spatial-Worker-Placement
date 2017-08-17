@@ -176,34 +176,34 @@ public class Building : MonoBehaviour {
         else claimAmount = 0;
 
         textMesh.color = Color.cyan;
-        int newPotentialClaimAmounLeftCounter;
+        int newPotentialClaimAmountLeftCounter;
         if (controller == null && claimAmount >= decrementRate)
         {
-            newPotentialClaimAmounLeftCounter = claimAmount;
+            newPotentialClaimAmountLeftCounter = claimAmount;
             sr.color = worker.parentPlayer.color;
         }
         else if (controller == worker.parentPlayer)
         {
-            newPotentialClaimAmounLeftCounter = claimAmountLeft + claimAmount;
+            newPotentialClaimAmountLeftCounter = claimAmountLeft + claimAmount;
         }
         else if (claimAmount > claimAmountLeft)
         {
-            newPotentialClaimAmounLeftCounter = claimAmount - claimAmountLeft;
+            newPotentialClaimAmountLeftCounter = claimAmount - claimAmountLeft;
             sr.color = worker.parentPlayer.color;
         }
         else if (claimAmount < claimAmountLeft)
         {
-            newPotentialClaimAmounLeftCounter = claimAmountLeft - claimAmount;
+            newPotentialClaimAmountLeftCounter = claimAmountLeft - claimAmount;
         }
         else
         {
-            newPotentialClaimAmounLeftCounter = 0;
+            newPotentialClaimAmountLeftCounter = 0;
             sr.color = Color.white;
         }
 
-        if (newPotentialClaimAmounLeftCounter != 0)
+        if (newPotentialClaimAmountLeftCounter != 0)
         {
-            textMesh.text = (newPotentialClaimAmounLeftCounter / decrementRate).ToString();
+            textMesh.text = (newPotentialClaimAmountLeftCounter / decrementRate).ToString();
         }
         else
         {
@@ -216,7 +216,7 @@ public class Building : MonoBehaviour {
         hoverInfoActive = false;
         if (claimAmountLeft != 0)
         {
-            textMesh.text = claimAmountLeft.ToString();
+            textMesh.text = (claimAmountLeft / decrementRate).ToString();
         }
         else
         {
