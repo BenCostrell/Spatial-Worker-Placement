@@ -238,6 +238,10 @@ public class Building : MonoBehaviour {
         {
             offset = new Vector3(-offset.x, offset.y, offset.z);
         }
+        if (transform.position.y > 0)
+        {
+            offset = new Vector3(offset.x, -offset.y, offset.z);
+        }
         tooltipRect.anchoredPosition =
             Services.main.mainCamera.WorldToScreenPoint(transform.position + offset);
         string tooltipText = "Bonus to each of controller's units:\n";

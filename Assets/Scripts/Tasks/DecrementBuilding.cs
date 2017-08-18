@@ -23,6 +23,7 @@ public class DecrementBuilding : Task
         initialScale = building.transform.localScale;
         initialColor = building.GetComponent<SpriteRenderer>().color;
         building.GetComponent<SpriteRenderer>().color = Color.magenta;
+        if (building.controller == null) SetStatus(TaskStatus.Success);
     }
 
     internal override void Update()

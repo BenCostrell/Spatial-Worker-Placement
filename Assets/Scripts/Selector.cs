@@ -140,7 +140,8 @@ public class Selector : MonoBehaviour
         if (selectedWorker != null)
         {
             if (hoveredTile.containedBuilding != null && 
-                !hoveredTile.containedBuilding.hoverInfoActive)
+                !hoveredTile.containedBuilding.hoverInfoActive
+                && !hoveredTile.containedBuilding.permanentlyControlled)
             {
                 hoveredTile.containedBuilding.ShowPotentialClaim(selectedWorker);
             }

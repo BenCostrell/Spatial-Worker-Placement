@@ -19,7 +19,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aafab2ec734c0334c8f867fda0cea70d, type: 2}
   spawnGrowTime: 0.2
   offset: {x: 0, y: 0.3}
-  startingPriceBump: 10
+  startingPriceBump: 5
   discountDecrementRate: 5
   decrementAnimTime: 0.4
   decrementScale: 1.25

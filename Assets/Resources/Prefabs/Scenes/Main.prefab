@@ -450,8 +450,8 @@ MonoBehaviour:
   minDistItems: 2
   numItems: 6
   itemDistAntivariance: 3
-  approxMinStartingItemVal: 15
-  approxMaxStartingItemVal: 25
+  approxMinStartingItemVal: 20
+  approxMaxStartingItemVal: 30
   numZones: 3
   minRadiusZones: 4
   minDistZones: 1
@@ -888,8 +888,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -280, y: -80}
-  m_SizeDelta: {x: 20, y: 40}
+  m_AnchoredPosition: {x: -280, y: -100}
+  m_SizeDelta: {x: 30, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224194494448064246
 RectTransform:
@@ -951,7 +951,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -280, y: -40}
+  m_AnchoredPosition: {x: -280, y: -60}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224467161156063502
@@ -987,7 +987,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -50, y: -110}
+  m_AnchoredPosition: {x: -50, y: -150}
   m_SizeDelta: {x: 160, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224778226289381978

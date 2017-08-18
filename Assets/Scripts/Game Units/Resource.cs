@@ -44,8 +44,7 @@ public class Resource : MonoBehaviour {
     public float noiseMag;
     public float acquireAnimDur;
     public float acquireAnimOffsetY;
-    [SerializeField]
-    private int growthRate;
+    public int growthRate;
     [HideInInspector]
     public bool animating;
 

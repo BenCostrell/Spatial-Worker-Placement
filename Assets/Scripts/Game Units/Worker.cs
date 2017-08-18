@@ -345,7 +345,8 @@ public class Worker : MonoBehaviour {
     void ClaimResources(Resource resource)
     {
         int openRoom = carryingCapacity - resourcesInHand;
-        int resourceClaimAmount = Mathf.Max(openRoom - bonusResourcePerPickup, 1);
+        int resourceClaimAmount = 
+            Mathf.Max(openRoom - bonusResourcePerPickup, resource.growthRate);
         int resourcesAvailable = resource.numResources;
         int yield = resource.GetClaimed(resourceClaimAmount, this);
         int resourcesGained;

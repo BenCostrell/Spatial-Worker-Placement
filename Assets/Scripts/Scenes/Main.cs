@@ -181,7 +181,8 @@ public class Main : Scene<TransitionData> {
     {
         foreach(Tile tile in Services.MapManager.buildingTiles)
         {
-            if (tile.containedBuilding.controller != null)
+            if (tile.containedBuilding.controller != null && 
+                !tile.containedBuilding.permanentlyControlled)
                 tile.containedBuilding.IncrementInfluence();
         }
     }
