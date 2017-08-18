@@ -80,8 +80,17 @@ public abstract class Zone
                 decrementTaskTree.Then(new TileExitZone(tiles[i], this));
             }
         }
-        if (expansionLevel < 0) Services.MapManager.RemoveZone(this);
+        if (expansionLevel < 1) Disappear();
         return decrementTaskTree;
+    }
+
+    void Disappear()
+    {
+        for (int i = tiles.Count - 1; i >= 0; i--)
+        {
+            tiles[i].ExitZone();
+        }
+        Services.MapManager.RemoveZone(this);
     }
 
     public void RemoveTile(Tile tile)
