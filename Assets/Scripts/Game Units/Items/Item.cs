@@ -114,7 +114,7 @@ public class Item
     public void ShowTooltip()
     {
         tooltipActive = true;
-        tooltip = GameObject.Instantiate(Services.Prefabs.ItemTooltip, 
+        tooltip = GameObject.Instantiate(Services.Prefabs.ItemTooltip,
             Services.UIManager.canvas);
         RectTransform tooltipRect = tooltip.GetComponent<RectTransform>();
         Vector3 offset = Services.ItemConfig.TooltipOffset;
@@ -123,8 +123,8 @@ public class Item
             offset = new Vector3(-offset.x, offset.y, offset.z);
         }
         tooltipRect.anchoredPosition = 
-            Services.main.mainCamera.WorldToScreenPoint( 
-                obj.transform.position + offset);
+            Services.main.mainCamera.WorldToScreenPoint(obj.transform.position + offset);
+        Debug.Log("ui pos:" + tooltipRect.anchoredPosition);
         string tooltipText = "";
         foreach (KeyValuePair<Item.StatType, int> bonus in statBonuses)
         {
